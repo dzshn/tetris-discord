@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "tetris"
+version = "0.1.0"
+description = "i have too much free time"
+authors = ["Sofia \"dzshn\" N. L. <zshn@pm.me>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9,<3.11"
+"discord.py" = {git = "https://github.com/Rapptz/discord.py"}
+numpy = "^1.21.2"
+
+[tool.poetry.dev-dependencies]
+yapf = "^0.31.0"
+toml = "^0.10.2"
+flake8 = "^3.9.2"
+rope = "^0.19.0"
+
+[tool.yapf]
+based_on_style = "google"
+column_limit = 110
+blank_line_before_nested_class_or_def = false
+dedent_closing_brackets = true
+split_before_dot = true
+coalesce_brackets = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
