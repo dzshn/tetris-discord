@@ -7,10 +7,16 @@ import numpy as np
 from discord.ext import commands
 
 Pieces = enum.Enum('PIECES', 'I L J S Z T O')
+# EMOTES = [
+#     '<:BG:883851510319026177>', '<:I_:883851823616766002>', '<:L_:883851571857854524>',
+#     '<:J_:883851652547891210>', '<:S_:883852392460845076>', '<:Z_:883852343442034749>',
+#     '<:T_:883852443044184145>', '<:O_:883852312462913556>', '<:GA:883951745309483079>',
+#     '<:GH:883951718549823528>'
+# ]
 EMOTES = [
-    '<:BG:883851510319026177>', '<:I_:883851823616766002>', '<:L_:883851571857854524>',
-    '<:J_:883851652547891210>', '<:S_:883852392460845076>', '<:Z_:883852343442034749>',
-    '<:T_:883852443044184145>', '<:O_:883852312462913556>', '<:GA:883951745309483079>',
+    '<:BG:883851510319026177>', '<:I_:884981803448930345>', '<:L_:884981803260190740>',
+    '<:J_:884981802966585396>', '<:S_:884981802886914059>', '<:Z_:884981803033690114>',
+    '<:T_:884981803067269121>', '<:O_:884981803125997569>', '<:GA:883951745309483079>',
     '<:GH:883951718549823528>'
 ]
 SHAPES = [
@@ -76,7 +82,7 @@ class Game:
 
             yield current_bag.pop()
 
-    def get_text(self):
+    def get_text(self) -> str:
         board = self.board.copy()
         piece, x, y, rot = self.current_piece
         for i in range(x, 30):
@@ -100,9 +106,13 @@ class Controls(discord.ui.View):
         self.game = game
         self.message = message
 
-    @discord.ui.button(label='\u200c', disabled=True, row=0)
-    async def _0(self, *_):
-        pass
+    @discord.ui.button(label='X', style=discord.ButtonStyle.danger, row=0)
+    async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
+        self.stop()
+        for i in self.children:
+            i.disabled = True
+
+        await self.update_message()
 
     @discord.ui.button(label='⇊', style=discord.ButtonStyle.primary, row=0)
     async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -136,6 +146,7 @@ class Controls(discord.ui.View):
 
         button.disabled = True
         await self.update_message()
+        button.disabled = False
 
     @discord.ui.button(label='🗘', style=discord.ButtonStyle.primary, row=0)
     async def rotate_cw2(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -185,7 +196,7 @@ class Controls(discord.ui.View):
     async def update_message(self):
         embed = discord.Embed(color=0xfa50a0, description=self.game.get_text())
         embed.add_field(
-            name='Hold', value=Pieces(self.game.hold).name if self.game.hold is not None else 'None'
+            name='Hold', value=f'`{Pieces(self.game.hold).name}`' if self.game.hold is not None else '`None`'
         )
         embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in self.game.queue))
         await self.message.edit(embed=embed, view=self)
@@ -196,12 +207,30 @@ class TetrisCog(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    async def dtc(self, ctx: commands.Context):
+        await ctx.send(
+            embed=discord.Embed(
+                description='\n'.join(
+                    ''.join(EMOTES[' ILJSZTO'.find(j)] for j in i) for i in ['          '] * 9 + [
+                        '  LL      ',
+                        '   LZZ   I',
+                        'JJ LTZZOOI',
+                        'J  TTTIOOI',  # My beloved <3
+                        'J   SSIZZI',
+                        'OO SSLIJZZ',
+                        'OO LLLIJJJ'
+                    ]
+                )
+            )
+        )
+
+    @commands.command()
     async def zen(self, ctx: commands.Context):
+        msg = await ctx.send(embed=discord.Embed(color=0xfa50a0, description='<a:dtcg:884158922020225054>'))
         game = Game()
         embed = discord.Embed(color=0xfa50a0, description=game.get_text())
-        embed.add_field(name='Hold', value='None')
+        embed.add_field(name='Hold', value='`None`')
         embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in game.queue))
-        msg = await ctx.send('\u200c')
         view = Controls(game, msg)
         await msg.edit(embed=embed, view=view)
 
