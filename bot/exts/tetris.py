@@ -92,6 +92,16 @@ class Piece:
     def shape(self) -> NDArray[np.int8]:
         return np.array(SHAPES[self.type - 1][self.rot], dtype=np.int8)
 
+    def copy(self):
+        return Piece(self.type, self.x, self.y, self.rot)
+
+    def drop(self, board: NDArray, height: int):
+        for _ in range(height):
+            if self.overlaps(board):
+                self.x -= 1
+                break
+            self.x += 1
+
     def rotate(self, r: int):
         self.rot += r
         if self.rot > 3:
@@ -140,12 +150,9 @@ class Game:
     def get_text(self) -> str:
         board = self.board.copy()
         piece = self.current_piece
-        for i in range(piece.x, 30):
-            if (piece + (i, 0)).overlaps(board):
-                ghost_x = i - 1
-                break
-
-        for sx, sy in piece.shape + piece.pos + (ghost_x, 0):
+        ghost = piece.copy()
+        ghost.drop(board, 30)
+        for sx, sy in ghost.shape + ghost.pos:
             board[sx, sy] = 9
 
         for sx, sy in piece.shape + piece.pos:
@@ -171,12 +178,8 @@ class Controls(discord.ui.View):
     @discord.ui.button(label='⇊', style=discord.ButtonStyle.primary, row=0)
     async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
         piece = self.game.current_piece
-        for i in range(piece.x, 30):
-            if (piece + (i, 0)).overlaps(self.game.board):
-                ghost_x = i - 1
-                break
-
-        for sx, sy in piece.shape + piece.pos + (ghost_x, 0):
+        piece.drop(self.game.board, 30)
+        for sx, sy in piece.shape + piece.pos:
             self.game.board[sx, sy] = piece.type
 
         self.game.current_piece = Piece(self.game.queue.pop(0))
