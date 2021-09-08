@@ -4,6 +4,7 @@ import random
 
 import discord
 import numpy as np
+from numpy.typing import NDArray
 from discord.ext import commands
 
 Pieces = enum.Enum('PIECES', 'I L J S Z T O')
@@ -65,11 +66,46 @@ SHAPES = [
 ]  # yapf: disable
 
 
+class Piece:
+    def __init__(self, t: int, x: int = 10, y: int = 3, r: int = 0):
+        self.type = t
+        self.pos = (x, y)
+        self.rot = r
+
+    @property
+    def x(self) -> int:
+        return self.pos[0]
+
+    @x.setter
+    def x(self, value):
+        self.pos = (value, self.y)
+
+    @property
+    def y(self) -> int:
+        return self.pos[1]
+
+    @y.setter
+    def y(self, value):
+        self.pos = (self.x, value)
+
+    @property
+    def shape(self) -> NDArray[np.int8]:
+        return np.array(SHAPES[self.type - 1][self.rot], dtype=np.int8)
+
+    def rotate(self, r: int):
+        self.rot += r
+        if self.rot > 3:
+            self.rot -= 4
+
+        if self.rot < 0:
+            self.rot += 4
+
+
 class Game:
     def __init__(self):
         self.board = np.zeros((30, 10), dtype=int)
         self._queue = self._queue_iter()
-        self.current_piece = (next(self._queue), 10, 3, 0)
+        self.current_piece = Piece(next(self._queue))
         self.queue = list(itertools.islice(self._queue, 4))
         self.hold = None
 
@@ -84,18 +120,18 @@ class Game:
 
     def get_text(self) -> str:
         board = self.board.copy()
-        piece, x, y, rot = self.current_piece
-        for i in range(x, 30):
-            for sx, sy in SHAPES[piece - 1][rot]:
-                if i + sx >= 30 or board[i + sx, y + sy]:
+        piece = self.current_piece
+        for i in range(piece.x, 30):
+            for sx, sy in piece.shape + (i, piece.y):
+                if sx >= 30 or board[sx, sy]:
                     ghx = i - 1
                     break
 
-        for sx, sy in SHAPES[piece - 1][rot]:
-            board[ghx + sx, y + sy] = 9
+        for sx, sy in piece.shape + (ghx, piece.y):
+            board[sx, sy] = 9
 
-        for sx, sy in SHAPES[piece - 1][rot]:
-            board[x + sx, y + sy] = piece
+        for sx, sy in piece.shape + piece.pos:
+            board[sx, sy] = piece.type
 
         return '\n'.join(''.join(EMOTES[j] for j in i) for i in board[14:])
 
@@ -116,17 +152,17 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='⇊', style=discord.ButtonStyle.primary, row=0)
     async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
-        piece, x, y, rot = self.game.current_piece
-        for i in range(x, 30):
-            for sx, sy in SHAPES[piece - 1][rot]:
-                if i + sx >= 30 or self.game.board[i + sx, y + sy]:
-                    x = i - 1
+        piece = self.game.current_piece
+        for i in range(piece.x, 30):
+            for sx, sy in piece.shape + (i, piece.y):
+                if sx >= 30 or self.game.board[sx, sy]:
+                    piece.x = i - 1
                     break
 
-        for sx, sy, in SHAPES[piece - 1][rot]:
-            self.game.board[x + sx, y + sy] = piece
+        for sx, sy in piece.shape + piece.pos:
+            self.game.board[sx, sy] = piece.type
 
-        self.game.current_piece = (self.game.queue.pop(0), 10, 3, 0)
+        self.game.current_piece = Piece(self.game.queue.pop(0))
         self.game.queue.append(next(self.game._queue))
         await self.update_message()
 
@@ -137,12 +173,12 @@ class Controls(discord.ui.View):
     @discord.ui.button(label='⤭', style=discord.ButtonStyle.primary, row=0)
     async def swap(self, button: discord.ui.Button, interaction: discord.Interaction):
         if self.game.hold is None:
-            self.game.hold = self.game.current_piece[0]
-            self.game.current_piece = (self.game.queue.pop(0), 10, 3, 0)
+            self.game.hold = self.game.current_piece.type
+            self.game.current_piece = Piece(self.game.queue.pop(0))
             self.game.queue.append(next(self.game._queue))
 
         else:
-            self.game.hold, self.game.current_piece = self.game.current_piece[0], (self.game.hold, 10, 3, 0)
+            self.game.hold, self.game.current_piece = self.game.current_piece.type, Piece(self.game.hold)
 
         button.disabled = True
         await self.update_message()
@@ -150,18 +186,12 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='🗘', style=discord.ButtonStyle.primary, row=0)
     async def rotate_cw2(self, button: discord.ui.Button, interaction: discord.Interaction):
-        p, x, y, r = self.game.current_piece
-        r += 2
-        if r > 3:
-            r -= 4
-        self.game.current_piece = (p, x, y, r)
+        self.game.current_piece.rotate(2)
         await self.update_message()
 
     @discord.ui.button(label='🡸', style=discord.ButtonStyle.primary, row=1)
     async def move_left(self, button: discord.ui.Button, interaction: discord.Interaction):
-        p, x, y, r = self.game.current_piece
-        y -= 1
-        self.game.current_piece = (p, x, y, r)
+        self.game.current_piece.y -= 1
         await self.update_message()
 
     @discord.ui.button(label='🡻', style=discord.ButtonStyle.primary, row=1)
@@ -170,27 +200,17 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='🡺', style=discord.ButtonStyle.primary, row=1)
     async def move_right(self, button: discord.ui.Button, interaction: discord.Interaction):
-        p, x, y, r = self.game.current_piece
-        y += 1
-        self.game.current_piece = (p, x, y, r)
+        self.game.current_piece.y += 1
         await self.update_message()
 
     @discord.ui.button(label='↺', style=discord.ButtonStyle.primary, row=1)
     async def rotate_ccw(self, button: discord.ui.Button, interaction: discord.Interaction):
-        p, x, y, r = self.game.current_piece
-        r -= 1
-        if r < 0:
-            r = 3
-        self.game.current_piece = (p, x, y, r)
+        self.game.current_piece.rotate(-1)
         await self.update_message()
 
     @discord.ui.button(label='↻', style=discord.ButtonStyle.primary, row=1)
     async def rotate_cw(self, button: discord.ui.Button, interaction: discord.Interaction):
-        p, x, y, r = self.game.current_piece
-        r += 1
-        if r > 3:
-            r = 0
-        self.game.current_piece = (p, x, y, r)
+        self.game.current_piece.rotate(1)
         await self.update_message()
 
     async def update_message(self):
