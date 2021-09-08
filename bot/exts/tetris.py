@@ -137,6 +137,7 @@ class Game:
         self.current_piece = Piece(next(self._queue))
         self.queue = list(itertools.islice(self._queue, 4))
         self.hold = None
+        self.hold_lock = False
 
     def _queue_iter(self) -> int:
         current_bag = []
@@ -184,6 +185,7 @@ class Controls(discord.ui.View):
 
         self.game.current_piece = Piece(self.game.queue.pop(0))
         self.game.queue.append(next(self.game._queue))
+        self.game.hold_lock = False
         await self.update_message()
 
     @discord.ui.button(label='\u200c', disabled=True, row=0)
@@ -200,9 +202,9 @@ class Controls(discord.ui.View):
         else:
             self.game.hold, self.game.current_piece = self.game.current_piece.type, Piece(self.game.hold)
 
+        self.game.hold_lock = True
         button.disabled = True
         await self.update_message()
-        button.disabled = False
 
     @discord.ui.button(label='🗘', style=discord.ButtonStyle.primary, row=0)
     async def rotate_cw2(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -216,6 +218,7 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='🡻', style=discord.ButtonStyle.primary, row=1)
     async def soft_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
+        self.game.current_piece.drop(self.game.board, 5)
         await self.update_message()
 
     @discord.ui.button(label='🡺', style=discord.ButtonStyle.primary, row=1)
@@ -234,6 +237,7 @@ class Controls(discord.ui.View):
         await self.update_message()
 
     async def update_message(self):
+        self.swap.disabled = self.game.hold_lock
         embed = discord.Embed(color=0xfa50a0, description=self.game.get_text())
         embed.add_field(
             name='Hold', value=f'`{Pieces(self.game.hold).name}`' if self.game.hold is not None else '`None`'
