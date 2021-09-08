@@ -8,18 +8,6 @@ from numpy.typing import NDArray
 from discord.ext import commands
 
 Pieces = enum.Enum('PIECES', 'I L J S Z T O')
-# EMOTES = [
-#     '<:BG:883851510319026177>', '<:I_:883851823616766002>', '<:L_:883851571857854524>',
-#     '<:J_:883851652547891210>', '<:S_:883852392460845076>', '<:Z_:883852343442034749>',
-#     '<:T_:883852443044184145>', '<:O_:883852312462913556>', '<:GA:883951745309483079>',
-#     '<:GH:883951718549823528>'
-# ]
-EMOTES = [
-    '<:BG:883851510319026177>', '<:I_:884981803448930345>', '<:L_:884981803260190740>',
-    '<:J_:884981802966585396>', '<:S_:884981802886914059>', '<:Z_:884981803033690114>',
-    '<:T_:884981803067269121>', '<:O_:884981803125997569>', '<:GA:883951745309483079>',
-    '<:GH:883951718549823528>'
-]
 SHAPES = [
     [
         [(1, 0), (1, 1), (1, 2), (1, 3)],
@@ -131,7 +119,8 @@ class Piece:
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, config: dict[str, str]):
+        self.emotes: list[str] = config['emotes']['pieces']
         self.board = np.zeros((30, 10), dtype=int)
         self._queue = self._queue_iter()
         self.current_piece = Piece(next(self._queue))
@@ -159,7 +148,7 @@ class Game:
         for sx, sy in piece.shape + piece.pos:
             board[sx, sy] = piece.type
 
-        return '\n'.join(''.join(EMOTES[j] for j in i) for i in board[14:])
+        return '\n'.join(''.join(self.emotes[j] for j in i) for i in board[14:])
 
 
 class Controls(discord.ui.View):
@@ -252,26 +241,31 @@ class TetrisCog(commands.Cog):
 
     @commands.command()
     async def dtc(self, ctx: commands.Context):
+        dtc = [' ' * 10] * 9 + [
+            '  LL      ',
+            '   LZZ   I',
+            'JJ LTZZOOI',
+            'J  TTTIOOI',  # My beloved <3
+            'J   SSIZZI',
+            'OO SSLIJZZ',
+            'OO LLLIJJJ'
+        ]
         await ctx.send(
             embed=discord.Embed(
                 description='\n'.join(
-                    ''.join(EMOTES[' ILJSZTO'.find(j)] for j in i) for i in ['          '] * 9 + [
-                        '  LL      ',
-                        '   LZZ   I',
-                        'JJ LTZZOOI',
-                        'J  TTTIOOI',  # My beloved <3
-                        'J   SSIZZI',
-                        'OO SSLIJZZ',
-                        'OO LLLIJJJ'
-                    ]
+                    ''.join(self.bot.config['emotes']['pieces'][' ILJSZTO'.find(j)] for j in i) for i in dtc
                 )
             )
         )
 
     @commands.command()
     async def zen(self, ctx: commands.Context):
-        msg = await ctx.send(embed=discord.Embed(color=0xfa50a0, description='<a:dtcg:884158922020225054>'))
-        game = Game()
+        msg = await ctx.send(
+            embed=discord.Embed(color=0xfa50a0, title='Loading...').set_image(
+                url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'
+            )
+        )
+        game = Game(self.bot.config)
         embed = discord.Embed(color=0xfa50a0, description=game.get_text())
         embed.add_field(name='Hold', value='`None`')
         embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in game.queue))

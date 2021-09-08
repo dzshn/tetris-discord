@@ -1,3 +1,5 @@
+import json
+import pathlib
 import pkgutil
 import traceback
 
@@ -9,6 +11,12 @@ from bot import exts
 
 class TetrisBot(commands.Bot):
     def __init__(self):
+        config_path = pathlib.Path('config.json')
+        if not config_path.exists():
+            open('config.json', 'w').write(open('config_defaults.json').read())
+
+        self.config = json.load(open('config_defaults.json')) | json.load(open('config.json'))
+
         super().__init__(
             allowed_mentions=discord.AllowedMentions(
                 everyone=False, users=True, roles=False, replied_user=True
