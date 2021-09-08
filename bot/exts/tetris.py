@@ -100,6 +100,25 @@ class Piece:
         if self.rot < 0:
             self.rot += 4
 
+    def overlaps(self, board: NDArray) -> bool:
+        for sx, sy in self.shape + self.pos:
+            if sx >= board.shape[0] or sy >= board.shape[1] or board[sx, sy] != 0:
+                return True
+
+        return False
+
+    def __add__(self, other):
+        if isinstance(other, tuple):
+            x, y = other
+
+        elif isinstance(other, Piece):
+            x, y = other.pos
+
+        else:
+            return NotImplemented
+
+        return Piece(self.type, self.x + x, self.y + y, self.rot)
+
 
 class Game:
     def __init__(self):
@@ -122,12 +141,11 @@ class Game:
         board = self.board.copy()
         piece = self.current_piece
         for i in range(piece.x, 30):
-            for sx, sy in piece.shape + (i, piece.y):
-                if sx >= 30 or board[sx, sy]:
-                    ghx = i - 1
-                    break
+            if (piece + (i, 0)).overlaps(board):
+                ghost_x = i - 1
+                break
 
-        for sx, sy in piece.shape + (ghx, piece.y):
+        for sx, sy in piece.shape + piece.pos + (ghost_x, 0):
             board[sx, sy] = 9
 
         for sx, sy in piece.shape + piece.pos:
@@ -154,12 +172,11 @@ class Controls(discord.ui.View):
     async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
         piece = self.game.current_piece
         for i in range(piece.x, 30):
-            for sx, sy in piece.shape + (i, piece.y):
-                if sx >= 30 or self.game.board[sx, sy]:
-                    piece.x = i - 1
-                    break
+            if (piece + (i, 0)).overlaps(self.game.board):
+                ghost_x = i - 1
+                break
 
-        for sx, sy in piece.shape + piece.pos:
+        for sx, sy in piece.shape + piece.pos + (ghost_x, 0):
             self.game.board[sx, sy] = piece.type
 
         self.game.current_piece = Piece(self.game.queue.pop(0))
