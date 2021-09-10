@@ -69,10 +69,15 @@ class Piece:
 
     @x.setter
     def x(self, value: int):
-        for value in range(value, self.x, int(math.copysign(1, self.x - value))):
-            if not Piece(self.board, self.type, value, self.y, self.rot).overlaps():
-                self.pos = (value, self.y)
-                return
+        target = self.x
+        step = int(math.copysign(1, value - self.x))
+        for _ in range(abs(self.x - value)):
+            if Piece(self.board, self.type, target + step, self.y, self.rot).overlaps():
+                break
+
+            target += step
+
+        self.pos = (target, self.y)
 
     @property
     def y(self) -> int:
@@ -80,10 +85,15 @@ class Piece:
 
     @y.setter
     def y(self, value: int):
-        for value in range(value, self.y, int(math.copysign(1, self.y - value))):
-            if not Piece(self.board, self.type, self.x, value, self.rot).overlaps():
-                self.pos = (self.x, value)
-                return
+        target = self.y
+        step = int(math.copysign(1, value - self.y))
+        for _ in range(abs(self.y - value)):
+            if Piece(self.board, self.type, self.x, target + step, self.rot).overlaps():
+                break
+
+            target += step
+
+        self.pos = (self.x, target)
 
     @property
     def rot(self) -> int:
