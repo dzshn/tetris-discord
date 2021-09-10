@@ -1,5 +1,6 @@
 import enum
 import itertools
+import math
 import random
 from typing import Any
 
@@ -60,35 +61,41 @@ class Piece:
         self.board = board
         self.type = t
         self.pos = (x, y)
-        self.rot = r
+        self._rot = r
 
     @property
     def x(self) -> int:
         return self.pos[0]
 
     @x.setter
-    def x(self, value):
-        if not 0 <= value < self.board.shape[0]:
-            return
-
-        if Piece(self.board, self.type, value, self.y, self.rot).overlaps():
-            return
-
-        self.pos = (value, self.y)
+    def x(self, value: int):
+        for value in range(value, self.x, int(math.copysign(1, self.x - value))):
+            if not Piece(self.board, self.type, value, self.y, self.rot).overlaps():
+                self.pos = (value, self.y)
+                return
 
     @property
     def y(self) -> int:
         return self.pos[1]
 
     @y.setter
-    def y(self, value):
-        if not 0 <= value < self.board.shape[1]:
+    def y(self, value: int):
+        for value in range(value, self.y, int(math.copysign(1, self.y - value))):
+            if not Piece(self.board, self.type, self.x, value, self.rot).overlaps():
+                self.pos = (self.x, value)
+                return
+
+    @property
+    def rot(self) -> int:
+        return self._rot
+
+    @rot.setter
+    def rot(self, value: int):
+        value %= 4
+        if Piece(self.board, self.type, self.x, self.y, value).overlaps():
             return
 
-        if Piece(self.board, self.type, self.x, value).overlaps():
-            return
-
-        self.pos = (self.x, value)
+        self._rot = value
 
     @property
     def shape(self) -> NDArray[np.int8]:
@@ -96,21 +103,6 @@ class Piece:
 
     def copy(self):
         return Piece(self.board, self.type, self.x, self.y, self.rot)
-
-    def drop(self, height: int):
-        for _ in range(height):
-            if self.overlaps():
-                self.x -= 1
-                break
-            self.x += 1
-
-    def rotate(self, r: int):
-        self.rot += r
-        if self.rot > 3:
-            self.rot -= 4
-
-        if self.rot < 0:
-            self.rot += 4
 
     def overlaps(self) -> bool:
         board = self.board
@@ -171,7 +163,7 @@ class Game:
         board = self.board.copy()
         piece = self.current_piece
         ghost = piece.copy()
-        ghost.drop(30)
+        ghost.x += 30
         for sx, sy in ghost.shape + ghost.pos:
             board[sx, sy] = 9
 
@@ -198,7 +190,7 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='⇊', style=discord.ButtonStyle.primary, row=0)
     async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
-        self.game.current_piece.drop(30)
+        self.game.current_piece.x += 30
         self.game.lock_piece()
         await self.update_message()
 
@@ -224,7 +216,7 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='🗘', style=discord.ButtonStyle.primary, row=0)
     async def rotate_cw2(self, button: discord.ui.Button, interaction: discord.Interaction):
-        self.game.current_piece.rotate(2)
+        self.game.current_piece.rot += 2
         await self.update_message()
 
     @discord.ui.button(label='🡸', style=discord.ButtonStyle.primary, row=1)
@@ -234,7 +226,7 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='🡻', style=discord.ButtonStyle.primary, row=1)
     async def soft_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
-        self.game.current_piece.drop(5)
+        self.game.current_piece.x += 5
         await self.update_message()
 
     @discord.ui.button(label='🡺', style=discord.ButtonStyle.primary, row=1)
@@ -244,12 +236,12 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='↺', style=discord.ButtonStyle.primary, row=1)
     async def rotate_ccw(self, button: discord.ui.Button, interaction: discord.Interaction):
-        self.game.current_piece.rotate(-1)
+        self.game.current_piece.rot -= 1
         await self.update_message()
 
     @discord.ui.button(label='↻', style=discord.ButtonStyle.primary, row=1)
     async def rotate_cw(self, button: discord.ui.Button, interaction: discord.Interaction):
-        self.game.current_piece.rotate(1)
+        self.game.current_piece.rot += 1
         await self.update_message()
 
     async def update_message(self):
