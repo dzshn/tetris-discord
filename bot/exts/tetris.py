@@ -196,10 +196,14 @@ class Game:
 
 
 class Controls(discord.ui.View):
-    def __init__(self, game: Game, message: discord.Message):
+    def __init__(self, game: Game, ctx: commands.Context, message: discord.Message):
         super().__init__()
         self.game = game
+        self.ctx = ctx
         self.message = message
+
+    async def interaction_check(self, interaction: discord.Interaction):
+        return interaction.user == self.ctx.author
 
     @discord.ui.button(label='X', style=discord.ButtonStyle.danger, row=0)
     async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -283,6 +287,7 @@ class Controls(discord.ui.View):
 class TetrisCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.players: dict[int, Game] = {}
 
     @commands.command()
     async def dtc(self, ctx: commands.Context):
@@ -305,18 +310,29 @@ class TetrisCog(commands.Cog):
 
     @commands.command()
     async def zen(self, ctx: commands.Context):
+        if ctx.author.id in self.players:
+            await ctx.send("There's already a game running!")
+            return
+
+        self.players[ctx.author.id] = None
         msg = await ctx.send(
             embed=discord.Embed(color=0xfa50a0, title='Loading...').set_image(
                 url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'
             )
         )
+
         game = Game(self.bot.config)
+        self.players[ctx.author.id] = game
+
         embed = discord.Embed(color=0xfa50a0, description=game.get_text())
         embed.add_field(name='Hold', value='`None`')
         embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in game.queue))
         embed.add_field(name='Score', value='0')
-        view = Controls(game, msg)
+        view = Controls(game, ctx, msg)
         await msg.edit(embed=embed, view=view)
+        await view.wait()
+
+        del self.players[ctx.author.id]
 
 
 def setup(bot: commands.Bot):
