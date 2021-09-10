@@ -1,6 +1,7 @@
 import enum
 import itertools
 import random
+from typing import Any
 
 import discord
 import numpy as np
@@ -55,7 +56,8 @@ SHAPES = [
 
 
 class Piece:
-    def __init__(self, t: int, x: int = 10, y: int = 3, r: int = 0):
+    def __init__(self, board: NDArray[np.int8], t: int, x: int = 10, y: int = 3, r: int = 0):
+        self.board = board
         self.type = t
         self.pos = (x, y)
         self.rot = r
@@ -66,6 +68,12 @@ class Piece:
 
     @x.setter
     def x(self, value):
+        if not 0 <= value < self.board.shape[0]:
+            return
+
+        if Piece(self.board, self.type, value, self.y, self.rot).overlaps():
+            return
+
         self.pos = (value, self.y)
 
     @property
@@ -74,6 +82,12 @@ class Piece:
 
     @y.setter
     def y(self, value):
+        if not 0 <= value < self.board.shape[1]:
+            return
+
+        if Piece(self.board, self.type, self.x, value).overlaps():
+            return
+
         self.pos = (self.x, value)
 
     @property
@@ -81,11 +95,11 @@ class Piece:
         return np.array(SHAPES[self.type - 1][self.rot], dtype=np.int8)
 
     def copy(self):
-        return Piece(self.type, self.x, self.y, self.rot)
+        return Piece(self.board, self.type, self.x, self.y, self.rot)
 
-    def drop(self, board: NDArray, height: int):
+    def drop(self, height: int):
         for _ in range(height):
-            if self.overlaps(board):
+            if self.overlaps():
                 self.x -= 1
                 break
             self.x += 1
@@ -98,9 +112,16 @@ class Piece:
         if self.rot < 0:
             self.rot += 4
 
-    def overlaps(self, board: NDArray) -> bool:
+    def overlaps(self) -> bool:
+        board = self.board
         for sx, sy in self.shape + self.pos:
-            if sx >= board.shape[0] or sy >= board.shape[1] or board[sx, sy] != 0:
+            if not 0 <= sx < board.shape[0]:
+                return True
+
+            if not 0 <= sy < board.shape[1]:
+                return True
+
+            if board[sx, sy]:
                 return True
 
         return False
@@ -115,15 +136,15 @@ class Piece:
         else:
             return NotImplemented
 
-        return Piece(self.type, self.x + x, self.y + y, self.rot)
+        return Piece(self.board, self.type, self.x + x, self.y + y, self.rot)
 
 
 class Game:
-    def __init__(self, config: dict[str, str]):
+    def __init__(self, config: dict[str, Any]):
         self.emotes: list[str] = config['emotes']['pieces']
-        self.board = np.zeros((30, 10), dtype=int)
+        self.board = np.zeros((30, 10), dtype=np.int8)
         self._queue = self._queue_iter()
-        self.current_piece = Piece(next(self._queue))
+        self.current_piece = Piece(self.board, next(self._queue))
         self.queue = list(itertools.islice(self._queue, 4))
         self.hold = None
         self.hold_lock = False
@@ -137,11 +158,20 @@ class Game:
 
             yield current_bag.pop()
 
+    def lock_piece(self):
+        piece = self.current_piece
+        for sx, sy in piece.shape + piece.pos:
+            self.board[sx, sy] = piece.type
+
+        self.current_piece = Piece(self.board, self.queue.pop(0))
+        self.queue.append(next(self._queue))
+        self.hold_lock = False
+
     def get_text(self) -> str:
         board = self.board.copy()
         piece = self.current_piece
         ghost = piece.copy()
-        ghost.drop(board, 30)
+        ghost.drop(30)
         for sx, sy in ghost.shape + ghost.pos:
             board[sx, sy] = 9
 
@@ -163,18 +193,13 @@ class Controls(discord.ui.View):
         for i in self.children:
             i.disabled = True
 
+        self.game.hold_lock = True
         await self.update_message()
 
     @discord.ui.button(label='⇊', style=discord.ButtonStyle.primary, row=0)
     async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
-        piece = self.game.current_piece
-        piece.drop(self.game.board, 30)
-        for sx, sy in piece.shape + piece.pos:
-            self.game.board[sx, sy] = piece.type
-
-        self.game.current_piece = Piece(self.game.queue.pop(0))
-        self.game.queue.append(next(self.game._queue))
-        self.game.hold_lock = False
+        self.game.current_piece.drop(30)
+        self.game.lock_piece()
         await self.update_message()
 
     @discord.ui.button(label='\u200c', disabled=True, row=0)
@@ -185,11 +210,13 @@ class Controls(discord.ui.View):
     async def swap(self, button: discord.ui.Button, interaction: discord.Interaction):
         if self.game.hold is None:
             self.game.hold = self.game.current_piece.type
-            self.game.current_piece = Piece(self.game.queue.pop(0))
+            self.game.current_piece = Piece(self.game.board, self.game.queue.pop(0))
             self.game.queue.append(next(self.game._queue))
 
         else:
-            self.game.hold, self.game.current_piece = self.game.current_piece.type, Piece(self.game.hold)
+            self.game.hold, self.game.current_piece = self.game.current_piece.type, Piece(
+                self.game.board, self.game.hold
+            )
 
         self.game.hold_lock = True
         button.disabled = True
@@ -207,7 +234,7 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='🡻', style=discord.ButtonStyle.primary, row=1)
     async def soft_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
-        self.game.current_piece.drop(self.game.board, 5)
+        self.game.current_piece.drop(5)
         await self.update_message()
 
     @discord.ui.button(label='🡺', style=discord.ButtonStyle.primary, row=1)
