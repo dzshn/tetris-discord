@@ -150,6 +150,7 @@ class Game:
         self.queue = list(itertools.islice(self._queue, 4))
         self.hold = None
         self.hold_lock = False
+        self.score = 0
 
     def _queue_iter(self) -> int:
         current_bag = []
@@ -164,6 +165,17 @@ class Game:
         piece = self.current_piece
         for sx, sy in piece.shape + piece.pos:
             self.board[sx, sy] = piece.type
+
+        line_clears = 0
+        for row, clear in enumerate(self.board.all(1)):
+            if clear:
+                self.board[row] = 0
+                self.board = np.concatenate(
+                    (np.roll(self.board[:row + 1], shift=1, axis=0), self.board[row + 1:])
+                )
+                line_clears += 1
+
+        self.score += [0, 100, 300, 500, 800][line_clears]
 
         self.current_piece = Piece(self.board, self.queue.pop(0))
         self.queue.append(next(self._queue))
@@ -200,7 +212,9 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='⇊', style=discord.ButtonStyle.primary, row=0)
     async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
+        dist = self.game.current_piece.x
         self.game.current_piece.x += 30
+        self.game.score += (self.game.current_piece.x - dist) * 2
         self.game.lock_piece()
         await self.update_message()
 
@@ -237,6 +251,7 @@ class Controls(discord.ui.View):
     @discord.ui.button(label='🡻', style=discord.ButtonStyle.primary, row=1)
     async def soft_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
         self.game.current_piece.x += 5
+        self.game.score += 5
         await self.update_message()
 
     @discord.ui.button(label='🡺', style=discord.ButtonStyle.primary, row=1)
@@ -261,6 +276,7 @@ class Controls(discord.ui.View):
             name='Hold', value=f'`{Pieces(self.game.hold).name}`' if self.game.hold is not None else '`None`'
         )
         embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in self.game.queue))
+        embed.add_field(name='Score', value=format(self.game.score, ','))
         await self.message.edit(embed=embed, view=self)
 
 
@@ -298,6 +314,7 @@ class TetrisCog(commands.Cog):
         embed = discord.Embed(color=0xfa50a0, description=game.get_text())
         embed.add_field(name='Hold', value='`None`')
         embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in game.queue))
+        embed.add_field(name='Score', value='0')
         view = Controls(game, msg)
         await msg.edit(embed=embed, view=view)
 
