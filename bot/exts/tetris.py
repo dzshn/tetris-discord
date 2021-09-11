@@ -150,7 +150,13 @@ class Game:
         self.queue = list(itertools.islice(self._queue, 4))
         self.hold = None
         self.hold_lock = False
+        self.combo = 0
+        self.b2b = 0
         self.score = 0
+        self.previous_score = 0
+        self.last_move: str = None
+        self.action_text: str = None
+        self.can_pc = False
 
     def _queue_iter(self) -> int:
         current_bag = []
@@ -162,9 +168,34 @@ class Game:
             yield current_bag.pop()
 
     def lock_piece(self):
+        if not self.can_pc:
+            self.can_pc = True
+
         piece = self.current_piece
         for sx, sy in piece.shape + piece.pos:
             self.board[sx, sy] = piece.type
+
+        tspin = False
+        if self.current_piece.type == Pieces.T.value:
+            x, y = self.current_piece.pos
+            max_x, max_y = self.board.shape
+            if x + 2 < max_x and y + 2 < max_y:
+                corners = sum(self.board[(x, x + 2, x, x + 2), (y, y, y + 2, y + 2)] != 0)
+
+            elif x + 2 > max_x and y + 2 < max_y:
+                corners = 2
+                corners += sum(self.board[(x, x), (y, y + 2)] != 0)
+
+            elif x + 2 < max_x and y + 2 > max_y:
+                corners = 2
+                corners += sum(self.board[(x, x + 2), (y, y)] != 0)
+
+            else:
+                corners = 3
+                corners += self.board[x, y] != 0
+
+            if corners >= 3 and self.last_move[0] == 'r':
+                tspin = True
 
         line_clears = 0
         for row, clear in enumerate(self.board.all(1)):
@@ -175,7 +206,55 @@ class Game:
                 )
                 line_clears += 1
 
-        self.score += [0, 100, 300, 500, 800][line_clears]
+        if tspin:
+            # TODO: Mini tspins are uncool and shouldn't give as much score.
+            self.score += [400, 800, 1200, 1600][line_clears]
+            self.action_text = ['T-Spin', 'T-Spin Single', 'T-Spin Double', 'T-Spin Triple'][line_clears]
+            if self.b2b > 1:
+                self.score += [0, 400, 600, 800][line_clears]
+
+            self.b2b += 1
+            if line_clears > 0:
+                self.combo += 1
+
+            else:
+                self.combo = 0
+
+        else:
+            self.score += [0, 100, 300, 500, 800][line_clears]
+            self.action_text = [None, 'Single', 'Double', 'Triple', 'Tetris'][line_clears]
+            if line_clears == 4:
+                self.b2b += 1
+                self.combo += 1
+                if self.b2b > 1:
+                    self.score += 400
+
+            elif line_clears > 0:
+                self.b2b = 0
+                self.combo += 1
+
+            else:
+                self.b2b = 0
+                self.combo = 0
+
+        if self.b2b > 1:
+            self.action_text = f'Back-to-Back {self.action_text}'
+
+        if self.combo > 1:
+            self.score += 50 * (self.combo - 1)
+            self.action_text = f'{self.action_text} + Combo {self.combo - 1}x'
+
+        if not self.board.any():
+            self.score += [0, 700, 900, 1200, 1200][line_clears]
+            if self.b2b > 1:
+                self.score += 2000
+
+            self.action_text = f'Perfect Clear + {self.action_text}'
+
+        if self.action_text:
+            self.action_text += '!' * (
+                line_clears // 2 + (self.combo > 1) + (self.b2b > 1) + tspin + (not self.board.any())
+            )
 
         self.current_piece = Piece(self.board, self.queue.pop(0))
         self.queue.append(next(self._queue))
@@ -218,6 +297,7 @@ class Controls(discord.ui.View):
     async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
         dist = self.game.current_piece.x
         self.game.current_piece.x += 30
+        self.game.previous_score = self.game.score
         self.game.score += (self.game.current_piece.x - dist) * 2
         self.game.lock_piece()
         await self.update_message()
@@ -244,43 +324,66 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='🗘', style=discord.ButtonStyle.primary, row=0)
     async def rotate_cw2(self, button: discord.ui.Button, interaction: discord.Interaction):
+        prev_r = self.game.current_piece.rot
         self.game.current_piece.rot += 2
+        if self.game.current_piece.rot != prev_r:
+            self.game.last_move = 'r2'
         await self.update_message()
 
     @discord.ui.button(label='🡸', style=discord.ButtonStyle.primary, row=1)
     async def move_left(self, button: discord.ui.Button, interaction: discord.Interaction):
+        prev_y = self.game.current_piece.y
         self.game.current_piece.y -= 1
+        if self.game.current_piece.y != prev_y:
+            self.game.last_move = 'mL'
         await self.update_message()
 
     @discord.ui.button(label='🡻', style=discord.ButtonStyle.primary, row=1)
     async def soft_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
+        dist = self.game.current_piece.x
         self.game.current_piece.x += 5
-        self.game.score += 5
+        self.game.previous_score = self.game.score
+        self.game.score += self.game.current_piece.x - dist
         await self.update_message()
 
     @discord.ui.button(label='🡺', style=discord.ButtonStyle.primary, row=1)
     async def move_right(self, button: discord.ui.Button, interaction: discord.Interaction):
+        prev_y = self.game.current_piece.y
         self.game.current_piece.y += 1
+        if self.game.current_piece.y != prev_y:
+            self.game.last_move = 'mR'
         await self.update_message()
 
     @discord.ui.button(label='↺', style=discord.ButtonStyle.primary, row=1)
     async def rotate_ccw(self, button: discord.ui.Button, interaction: discord.Interaction):
+        prev_r = self.game.current_piece.rot
         self.game.current_piece.rot -= 1
+        if self.game.current_piece.rot != prev_r:
+            self.game.last_move = 'rL'
         await self.update_message()
 
     @discord.ui.button(label='↻', style=discord.ButtonStyle.primary, row=1)
     async def rotate_cw(self, button: discord.ui.Button, interaction: discord.Interaction):
+        prev_r = self.game.current_piece.rot
         self.game.current_piece.rot += 1
+        if self.game.current_piece.rot != prev_r:
+            self.game.last_move = 'rR'
         await self.update_message()
 
     async def update_message(self):
         self.swap.disabled = self.game.hold_lock
-        embed = discord.Embed(color=0xfa50a0, description=self.game.get_text())
+        embed = discord.Embed(
+            color=0xfa50a0,
+            title=self.game.action_text or discord.Embed.Empty,
+            description=self.game.get_text()
+        )
         embed.add_field(
             name='Hold', value=f'`{Pieces(self.game.hold).name}`' if self.game.hold is not None else '`None`'
         )
         embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in self.game.queue))
-        embed.add_field(name='Score', value=format(self.game.score, ','))
+        embed.add_field(
+            name='Score', value=f'**{self.game.score:,}** +{self.game.score - self.game.previous_score}'
+        )
         await self.message.edit(embed=embed, view=self)
 
 
@@ -327,7 +430,7 @@ class TetrisCog(commands.Cog):
         embed = discord.Embed(color=0xfa50a0, description=game.get_text())
         embed.add_field(name='Hold', value='`None`')
         embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in game.queue))
-        embed.add_field(name='Score', value='0')
+        embed.add_field(name='Score', value='**0** +0')
         view = Controls(game, ctx, msg)
         await msg.edit(embed=embed, view=view)
         await view.wait()
