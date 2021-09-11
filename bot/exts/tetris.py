@@ -10,6 +10,7 @@ from numpy.typing import NDArray
 from discord.ext import commands
 
 Pieces = enum.Enum('PIECES', 'I L J S Z T O')
+# yapf: disable
 SHAPES = [
     [
         [(1, 0), (1, 1), (1, 2), (1, 3)],
@@ -53,7 +54,34 @@ SHAPES = [
         [(0, 1), (0, 2), (1, 1), (1, 2)],
         [(0, 1), (0, 2), (1, 1), (1, 2)]
     ]
-]  # yapf: disable
+]
+SRS_KICKS = [
+    [
+        [...],
+        [(+0, -1), (-1, -1), (+2, +0), (+2, -1)],            # 0 -> 1  +90
+        [(-1, +0), (-1, +1), (-1, -1), (+0, +1), (+0, -1)],  # 0 -> 2  180
+        [(+0, +1), (-1, +1), (+2, +0), (+2, +1)]             # 0 -> 3  -90
+    ],
+    [
+        [(+0, +1), (+1, +1), (-2, +0), (-2, +1)],            # 1 -> 0  -90
+        [...],
+        [(+0, +1), (+1, +1), (-2, +0), (-2, +1)],            # 1 -> 2  +90
+        [(+0, +1), (-2, +1), (-1, +1), (-2, +0), (-1, +0)]   # 1 -> 3  180
+    ],
+    [
+        [(+1, +0), (+1, -1), (+1, 1), (+0, -1), (+0, +1)],   # 2 -> 0  180
+        [(+0, -1), (-1, -1), (+2, +0), (+2, -1)],            # 2 -> 1  -90
+        [...],
+        [(+0, +1), (-1, +1), (+2, +0), (+2, +1)]             # 2 -> 3  +90
+    ],
+    [
+        [(+0, -1), (+1, -1), (-2, +0), (-2, -1)],            # 3 -> 0  +90
+        [(+0, -1), (-2, -1), (-1, -1), (-2, +0), (-1, +0)],  # 3 -> 1  180
+        [(+0, -1), (+1, -1), (-2, +0), (-2, -1)],            # 3 -> 2  -90
+        [...]
+    ]
+]
+# yapf: enable
 
 
 class Piece:
@@ -102,8 +130,14 @@ class Piece:
     @rot.setter
     def rot(self, value: int):
         value %= 4
+        previous = self._rot
         if Piece(self.board, self.type, self.x, self.y, value).overlaps():
-            return
+            for x, y in SRS_KICKS[previous][value]:
+                if not Piece(self.board, self.type, self.x + x, self.y + y, value).overlaps():
+                    self.pos = (self.x + x, self.y + y)
+                    break
+            else:
+                return
 
         self._rot = value
 
