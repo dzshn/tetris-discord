@@ -69,7 +69,7 @@ SRS_KICKS = [
         [(+0, +1), (-2, +1), (-1, +1), (-2, +0), (-1, +0)]   # 1 -> 3  180
     ],
     [
-        [(+1, +0), (+1, -1), (+1, 1), (+0, -1), (+0, +1)],   # 2 -> 0  180
+        [(+1, +0), (+1, -1), (+1, +1), (+0, -1), (+0, +1)],  # 2 -> 0  180
         [(+0, -1), (-1, -1), (+2, +0), (+2, -1)],            # 2 -> 1  -90
         [...],
         [(+0, +1), (-1, +1), (+2, +0), (+2, +1)]             # 2 -> 3  +90
@@ -188,7 +188,7 @@ class Game:
         self.b2b = 0
         self.score = 0
         self.previous_score = 0
-        self.last_move: str = None
+        self.last_move = 'None'
         self.action_text: str = None
         self.can_pc = False
 
@@ -318,14 +318,9 @@ class Controls(discord.ui.View):
     async def interaction_check(self, interaction: discord.Interaction):
         return interaction.user == self.ctx.author
 
-    @discord.ui.button(label='X', style=discord.ButtonStyle.danger, row=0)
-    async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
-        self.stop()
-        for i in self.children:
-            i.disabled = True
-
-        self.game.hold_lock = True
-        await self.update_message()
+    @discord.ui.button(label='\u200c', disabled=True, row=0)
+    async def _0(self, *_):
+        pass
 
     @discord.ui.button(label='⇊', style=discord.ButtonStyle.primary, row=0)
     async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -418,58 +413,35 @@ class Controls(discord.ui.View):
         embed.add_field(
             name='Score', value=f'**{self.game.score:,}** +{self.game.score - self.game.previous_score}'
         )
+        embed.set_footer(text=self.ctx.author, icon_url=self.ctx.author.avatar)
         await self.message.edit(embed=embed, view=self)
 
 
 class TetrisCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.players: dict[int, Game] = {}
-
-    @commands.command()
-    async def dtc(self, ctx: commands.Context):
-        dtc = [' ' * 10] * 9 + [
-            '  LL      ',
-            '   LZZ   I',
-            'JJ LTZZOOI',
-            'J  TTTIOOI',  # My beloved <3
-            'J   SSIZZI',
-            'OO SSLIJZZ',
-            'OO LLLIJJJ'
-        ]
-        await ctx.send(
-            embed=discord.Embed(
-                description='\n'.join(
-                    ''.join(self.bot.config['emotes']['pieces'][' ILJSZTO'.find(j)] for j in i) for i in dtc
-                )
-            )
-        )
 
     @commands.command()
     async def zen(self, ctx: commands.Context):
-        if ctx.author.id in self.players:
+        games: dict[int, discord.View] = self.bot.get_cog('Manager').games
+
+        if ctx.author.id in games:
             await ctx.send("There's already a game running!")
             return
 
-        self.players[ctx.author.id] = None
-        msg = await ctx.send(
-            embed=discord.Embed(color=0xfa50a0, title='Loading...').set_image(
-                url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'
-            )
+        games[ctx.author.id] = None
+
+        embed = discord.Embed(color=0xfa50a0, title='Loading...').set_image(
+            url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'
         )
-
+        msg = await ctx.send(embed=embed)
         game = Game(self.bot.config)
-        self.players[ctx.author.id] = game
-
-        embed = discord.Embed(color=0xfa50a0, description=game.get_text())
-        embed.add_field(name='Hold', value='`None`')
-        embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in game.queue))
-        embed.add_field(name='Score', value='**0** +0')
         view = Controls(game, ctx, msg)
-        await msg.edit(embed=embed, view=view)
+        games[ctx.author.id] = view
+        await view.update_message()
         await view.wait()
 
-        del self.players[ctx.author.id]
+        del games[ctx.author.id]
 
 
 def setup(bot: commands.Bot):
