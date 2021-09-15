@@ -258,6 +258,7 @@ class Game:
     def hard_drop(self):
         prev_x = self.current_piece.x
         self.current_piece.x += 30
+        self.previous_score = self.score
         self.score += (self.current_piece.x - prev_x) * 2
         if self.current_piece.x > prev_x:
             self.spun = False
