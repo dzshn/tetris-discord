@@ -159,10 +159,10 @@ class Game:
             if corners >= 3 and self.spun:
                 tspin = True
                 front_corner_offsets = [
-                    [(x, x), (y, y + 2)],          # ▒▒██▒▒ <- these corners
-                    [(x, x + 2), (y + 2, y + 2)],  # ██████
-                    [(x + 2, x + 2), (y, y + 2)],
-                    [(x, x + 2), (y, y)]
+                    ((x, x), (y, y + 2)),          # ▒▒██▒▒ <- these corners
+                    ((x, x + 2), (y + 2, y + 2)),  # ██████
+                    ((x + 2, x + 2), (y, y + 2)),
+                    ((x, x + 2), (y, y))
                 ]  # yapf: disable
 
                 # Only is a mini if a front corner isn't present and it wasn't a X -> +2 kick
