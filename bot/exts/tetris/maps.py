@@ -1,9 +1,9 @@
-import base64
-
 import discord
 import numpy as np
 from discord.ext import commands
-from numpy.typing import NDArray
+
+from bot.lib import Game, Pieces
+from bot.lib.maps import Encoder
 
 
 class Maps(commands.Cog):
@@ -11,15 +11,45 @@ class Maps(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    async def convert(self, ctx: commands.Command, *, text: str):
+        text = text.strip('`\n').upper()
+        board = np.zeros((text.count('\n') + 1, 10), dtype=np.int8)
+        for x, line in enumerate(text.splitlines()):
+            for y, char in enumerate(line):
+                if x >= 30 or y >= 10:
+                    raise commands.BadArgument('Matrix is too big!')
+
+                if char == ' ' or char == '_':
+                    continue
+
+                if char == 'X' or char == 'G':
+                    board[x, y] = 8
+
+                else:
+                    try:
+                        board[x, y] = Pieces[char].value
+
+                    except KeyError as e:
+                        raise commands.BadArgument(f'Invalid piece "{char}"') from e
+
+        encoded = Encoder.encode(board)
+        await ctx.send(f'`{encoded}`')
+
+    @commands.command()
     async def view(self, ctx: commands.Command, encoded: str):
-        board, piece = encoded.strip('`').split('@') if '@' in encoded else (encoded.strip('`'), None)
-        pairs = []
-        for i in base64.b64decode(board):
-            pairs.append([i >> 4, i - (i >> 4 << 4)])
+        try:
+            board, piece = Encoder.decode(encoded.strip('`'))
+        except ValueError as e:
+            raise commands.BadArgument('Invalid map string') from e
 
-        board = np.reshape(pairs, (len(pairs) * 2 // 10, 10))
-
-        await ctx.send('\n'.join(''.join(self.bot.config['emotes']['pieces'][j] for j in i) for i in board))
+        await ctx.send(
+            embed=discord.Embed(
+                color=0xfa50a0,
+                description='\n'.join(
+                    ''.join(self.bot.config['emotes']['pieces'][j] for j in i) for i in board[-16:]
+                )
+            )
+        )
 
     @commands.command()
     async def export(self, ctx: commands.Context):
@@ -27,26 +57,9 @@ class Maps(commands.Cog):
         if ctx.author.id not in games:
             raise commands.CheckFailure("There isn't any game running!")
 
-        game = games[ctx.author.id].game
-        board: NDArray[np.int8] = game.board.copy()
-        piece = game.current_piece
-        export_board = []
-        for i, j in enumerate(board):
-            if j.any():
-                board = board[i:]
-                break
-
-        for i, j in enumerate(reversed(board)):
-            if 9 in j:
-                # TODO: encode garbage lines separately
-                board = board[:i]
-
-        for i, j in board.reshape(len(board.flatten()) // 2, 2):
-            export_board.append((i << 4) + j)
-
-        await ctx.send(
-            f'`{base64.b64encode(bytes(export_board)).decode()}@{piece.type}+{piece.x}+{piece.y}+{piece.rot}`'
-        )
+        game: Game = games[ctx.author.id].game
+        encoded = Encoder.encode(game.board, game.current_piece)
+        await ctx.send(f'`{encoded}`')
 
 
 def setup(bot: commands.Bot):
