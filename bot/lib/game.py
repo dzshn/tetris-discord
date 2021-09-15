@@ -117,6 +117,20 @@ class Game:
         self.score = 0
         self.previous_score = 0
         self.spun = False
+        self.kick_x = 0
+        self.action_text: str = None
+        self.can_pc = False
+
+    def reset(self):
+        self.board = np.zeros((30, 10), dtype=np.int8)
+        self._queue = self._queue_iter()
+        self.current_piece = Piece(self.board, next(self._queue))
+        self.queue = list(itertools.islice(self._queue, 4))
+        self.hold = None
+        self.hold_lock = False
+        self.combo = 0
+        self.b2b = 0
+        self.spun = False
         self.action_text: str = None
         self.can_pc = False
 
@@ -234,9 +248,17 @@ class Game:
                 line_clears // 2 + (self.combo > 1) + (self.b2b > 1) + tspin + (not self.board.any())
             )
 
+        if np.any((self.current_piece.shape + self.current_piece.pos) < 10):
+            self.reset()
+            self.action_text = 'Top out!'
+
         self.current_piece = Piece(self.board, self.queue.pop(0))
         self.queue.append(next(self._queue))
         self.hold_lock = False
+
+        if self.current_piece.overlaps():
+            self.reset()
+            self.action_text = 'Block out!'
 
     def get_text(self) -> str:
         board = self.board.copy()
