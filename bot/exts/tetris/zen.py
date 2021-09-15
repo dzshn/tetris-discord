@@ -1,12 +1,16 @@
 import discord
 from discord.ext import commands
+from tinydb import where
+from tinydb.table import Table
 
 from bot.lib import Controls, Game
+from bot.lib.maps import Encoder
 
 
-class TetrisCog(commands.Cog):
+class Zen(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.db: Table = bot.db.table('zen')
 
     @commands.command()
     async def zen(self, ctx: commands.Context):
@@ -23,13 +27,31 @@ class TetrisCog(commands.Cog):
         )
         msg = await ctx.send(embed=embed)
         game = Game(self.bot.config)
+        if (save := self.db.get(where('user_id') == ctx.author.id)) is not None:
+            game.board, game.current_piece = Encoder.decode(save['board'])
+            game.score = save['score']
+            game.queue = save['queue']
+            game.hold = save['hold']
+            game.hold_lock = save['hold_lock']
+
         view = Controls(game, ctx, msg)
         games[ctx.author.id] = view
         await view.update_message()
         await view.wait()
 
+        save = {
+            'user_id': ctx.author.id,
+            'board': Encoder.encode(game.board, game.current_piece),
+            'score': game.score,
+            'queue': game.queue,
+            'hold': game.hold,
+            'hold_lock': game.hold_lock
+        }
+
+        self.db.upsert(save, where('user_id') == ctx.author.id)
+
         del games[ctx.author.id]
 
 
 def setup(bot: commands.Bot):
-    bot.add_cog(TetrisCog(bot))
+    bot.add_cog(Zen(bot))

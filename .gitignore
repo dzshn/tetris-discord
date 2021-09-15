@@ -2,3 +2,4 @@ TOKEN
 config.json
 __pycache__/
 .vscode/
+db.json

@@ -58,7 +58,7 @@ class Encoder:
 
         encoded += '@'
         if piece is not None:
-            encoded += (f'@{piece.type}+{piece.x}+{piece.y}+{piece.rot}' if piece else '@')
+            encoded += f'{piece.type}+{piece.x}+{piece.y}+{piece.rot}'
 
         return encoded
 
@@ -78,8 +78,11 @@ class Encoder:
                 break
 
         board = np.array(flat_board, dtype=np.int8).reshape((-1, 10))
+        if board.shape[0] < 30:
+            board = np.concatenate((np.zeros((30 - board.shape[0], 10), dtype=np.int8), board))
+
         if piece is not None:
-            piece = Piece(board, *piece.split('+'))
+            piece = Piece(board, *map(int, piece.split('+')))
 
         if garbage is not None:
             for i in base64.b64decode(garbage):

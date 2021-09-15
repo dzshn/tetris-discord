@@ -143,6 +143,14 @@ python-versions = "*"
 dev = ["pytest"]
 
 [[package]]
+name = "tinydb"
+version = "4.5.1"
+description = "TinyDB is a tiny, document oriented database optimized for your happiness :)"
+category = "main"
+optional = false
+python-versions = ">=3.5,<4.0"
+
+[[package]]
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
@@ -181,7 +189,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "f50ff631c4371e61ad950575a04c7029d9a7e7073da53291e1964ea0b5ec2dfc"
+content-hash = "68bbd2e26441f537e9bea087c4e5edc9c7794d47a7db8861d25189858aa404be"
 
 [metadata.files]
 aiohttp = [
@@ -329,6 +337,10 @@ pyflakes = [
 ]
 rope = [
     {file = "rope-0.19.0.tar.gz", hash = "sha256:64e6d747532e1f5c8009ec5aae3e5523a5bcedf516f39a750d57d8ed749d90da"},
+]
+tinydb = [
+    {file = "tinydb-4.5.1-py3-none-any.whl", hash = "sha256:99529ea4d5d4b7a3fd4b3f50b48b5023c31d6f7a4a87bb103b4abd1d959d93b9"},
+    {file = "tinydb-4.5.1.tar.gz", hash = "sha256:b780bceac6e37573b10fbcab6bcebb6b8bd5d8a0024533b5a452d9ef83465783"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},

@@ -5,6 +5,9 @@ import traceback
 
 import discord
 from discord.ext import commands
+from tinydb import TinyDB
+from tinydb.storages import JSONStorage
+from tinydb.middlewares import CachingMiddleware
 
 from bot import exts
 
@@ -16,6 +19,7 @@ class TetrisBot(commands.Bot):
             open('config.json', 'w').write(open('config_defaults.json').read())
 
         self.config = json.load(open('config_defaults.json')) | json.load(open('config.json'))
+        self.db = TinyDB('db.json', storage=CachingMiddleware(JSONStorage))
 
         super().__init__(
             allowed_mentions=discord.AllowedMentions(
@@ -37,6 +41,10 @@ class TetrisBot(commands.Bot):
 
             except commands.ExtensionError:
                 traceback.print_exc()
+
+    async def close(self):
+        await super().close()
+        self.db.close()
 
 
 bot = TetrisBot()
