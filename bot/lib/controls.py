@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.lib.game import Game, Piece, Pieces
+from bot.lib.game import Game, Pieces
 
 
 class Controls(discord.ui.View):
@@ -20,11 +20,7 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='⇊', style=discord.ButtonStyle.primary, row=0)
     async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
-        dist = self.game.current_piece.x
-        self.game.current_piece.x += 30
-        self.game.previous_score = self.game.score
-        self.game.score += (self.game.current_piece.x - dist) * 2
-        self.game.lock_piece()
+        self.game.hard_drop()
         await self.update_message()
 
     @discord.ui.button(label='\u200c', disabled=True, row=0)
@@ -33,66 +29,37 @@ class Controls(discord.ui.View):
 
     @discord.ui.button(label='⤭', style=discord.ButtonStyle.primary, row=0)
     async def swap(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if self.game.hold is None:
-            self.game.hold = self.game.current_piece.type
-            self.game.current_piece = Piece(self.game.board, self.game.queue.pop(0))
-            self.game.queue.append(next(self.game._queue))
-
-        else:
-            self.game.hold, self.game.current_piece = self.game.current_piece.type, Piece(
-                self.game.board, self.game.hold
-            )
-
-        self.game.hold_lock = True
-        button.disabled = True
+        self.game.swap()
         await self.update_message()
 
     @discord.ui.button(label='🗘', style=discord.ButtonStyle.primary, row=0)
     async def rotate_cw2(self, button: discord.ui.Button, interaction: discord.Interaction):
-        prev_r = self.game.current_piece.rot
-        self.game.current_piece.rot += 2
-        if self.game.current_piece.rot != prev_r:
-            self.game.last_move = 'r2'
+        self.game.rotate(2)
         await self.update_message()
 
     @discord.ui.button(label='🡸', style=discord.ButtonStyle.primary, row=1)
     async def move_left(self, button: discord.ui.Button, interaction: discord.Interaction):
-        prev_y = self.game.current_piece.y
-        self.game.current_piece.y -= 1
-        if self.game.current_piece.y != prev_y:
-            self.game.last_move = 'mL'
+        self.game.drag(-1)
         await self.update_message()
 
     @discord.ui.button(label='🡻', style=discord.ButtonStyle.primary, row=1)
     async def soft_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
-        dist = self.game.current_piece.x
-        self.game.current_piece.x += 5
-        self.game.previous_score = self.game.score
-        self.game.score += self.game.current_piece.x - dist
+        self.game.soft_drop()
         await self.update_message()
 
     @discord.ui.button(label='🡺', style=discord.ButtonStyle.primary, row=1)
     async def move_right(self, button: discord.ui.Button, interaction: discord.Interaction):
-        prev_y = self.game.current_piece.y
-        self.game.current_piece.y += 1
-        if self.game.current_piece.y != prev_y:
-            self.game.last_move = 'mR'
+        self.game.drag(+1)
         await self.update_message()
 
     @discord.ui.button(label='↺', style=discord.ButtonStyle.primary, row=1)
     async def rotate_ccw(self, button: discord.ui.Button, interaction: discord.Interaction):
-        prev_r = self.game.current_piece.rot
-        self.game.current_piece.rot -= 1
-        if self.game.current_piece.rot != prev_r:
-            self.game.last_move = 'rL'
+        self.game.rotate(-1)
         await self.update_message()
 
     @discord.ui.button(label='↻', style=discord.ButtonStyle.primary, row=1)
     async def rotate_cw(self, button: discord.ui.Button, interaction: discord.Interaction):
-        prev_r = self.game.current_piece.rot
-        self.game.current_piece.rot += 1
-        if self.game.current_piece.rot != prev_r:
-            self.game.last_move = 'rR'
+        self.game.rotate(+1)
         await self.update_message()
 
     async def update_message(self):

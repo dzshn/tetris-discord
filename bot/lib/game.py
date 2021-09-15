@@ -116,7 +116,7 @@ class Game:
         self.b2b = 0
         self.score = 0
         self.previous_score = 0
-        self.last_move = 'None'
+        self.spun = False
         self.action_text: str = None
         self.can_pc = False
 
@@ -156,8 +156,19 @@ class Game:
                 corners = 3
                 corners += self.board[x, y] != 0
 
-            if corners >= 3 and self.last_move[0] == 'r':
+            if corners >= 3 and self.spun:
                 tspin = True
+                front_corner_offsets = [
+                    [(x, x), (y, y + 2)],          # ▒▒██▒▒ <- these corners
+                    [(x, x + 2), (y + 2, y + 2)],  # ██████
+                    [(x + 2, x + 2), (y, y + 2)],
+                    [(x, x + 2), (y, y)]
+                ]  # yapf: disable
+
+                # Only is a mini if a front corner isn't present and it wasn't a X -> +2 kick
+                mini_spin = not np.all(
+                    self.board[front_corner_offsets[self.current_piece.rot]] != 0
+                ) and self.kick_x < 2
 
         line_clears = 0
         for row, clear in enumerate(self.board.all(1)):
@@ -169,11 +180,16 @@ class Game:
                 line_clears += 1
 
         if tspin:
-            # TODO: Mini tspins are uncool and shouldn't give as much score.
-            self.score += [400, 800, 1200, 1600][line_clears]
-            self.action_text = ['T-Spin', 'T-Spin Single', 'T-Spin Double', 'T-Spin Triple'][line_clears]
-            if self.b2b > 1:
-                self.score += [0, 400, 600, 800][line_clears]
+            if mini_spin:
+                self.action_text = ['Mini T-Spin', 'Mini T-Spin Single', 'Mini T-Spin Double'][line_clears]
+                self.score += [100, 200, 400][line_clears]
+                if self.b2b > 1:
+                    self.score += [0, 100, 200][line_clears]
+            else:
+                self.action_text = ['T-Spin', 'T-Spin Single', 'T-Spin Double', 'T-Spin Triple'][line_clears]
+                self.score += [400, 800, 1200, 1600][line_clears]
+                if self.b2b > 1:
+                    self.score += [0, 400, 600, 800][line_clears]
 
             self.b2b += 1
             if line_clears > 0:
@@ -234,3 +250,44 @@ class Game:
             board[sx, sy] = piece.type
 
         return '\n'.join(''.join(self.emotes[j] for j in i) for i in board[14:])
+
+    def drop(self, height: int):
+        self.current_piece.x += height
+        self.spun = False
+
+    def hard_drop(self):
+        prev_x = self.current_piece.x
+        self.current_piece.x += 30
+        self.score += (self.current_piece.x - prev_x) * 2
+        if self.current_piece.x > prev_x:
+            self.spun = False
+        self.lock_piece()
+
+    def soft_drop(self):
+        prev_x = self.current_piece.x
+        self.drop(5)
+        self.score += self.current_piece.x - prev_x
+
+    def swap(self):
+        if self.hold is None:
+            self.hold = self.current_piece.type
+            self.current_piece = Piece(self.board, self.queue.pop(0))
+            self.queue.append(next(self._queue))
+
+        else:
+            self.hold, self.current_piece = self.current_piece.type, Piece(self.board, self.hold)
+
+        self.hold_lock = True
+
+    def rotate(self, turns: int):
+        prev_pos = self.current_piece.pos
+        prev_rot = self.current_piece.rot
+        self.current_piece.rot += turns
+        self.spun = prev_rot != self.current_piece.rot
+        self.kick_x = self.current_piece.x - prev_pos[0]
+
+    def drag(self, dist: int):
+        prev_y = self.current_piece.y
+        self.current_piece.y += dist
+        if self.current_piece.y != prev_y:
+            self.spun = False
