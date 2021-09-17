@@ -248,9 +248,10 @@ class Game:
                 line_clears // 2 + (self.combo > 1) + (self.b2b > 1) + tspin + (not self.board.any())
             )
 
-        if np.any((self.current_piece.shape + self.current_piece.pos) < 10):
-            self.reset()
-            self.action_text = 'Top out!'
+        for sx, sy in self.current_piece.shape + self.current_piece.pos:
+            if sx < 10:
+                self.reset()
+                self.action_text = 'Top out!'
 
         self.current_piece = Piece(self.board, self.queue.pop(0))
         self.queue.append(next(self._queue))

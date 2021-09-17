@@ -14,13 +14,13 @@ class Zen(commands.Cog):
 
     @commands.command()
     async def restart(self, ctx: commands.Context):
-        games: dict[int, discord.View] = self.bot.get_cog('Manager').games
+        games: dict[int, Game] = self.bot.get_cog('Manager').games
 
         if ctx.author.id not in games:
             await ctx.send("There isn't a game running!")
             return
 
-        games[ctx.author.id].game.restart()
+        games[ctx.author.id].game.reset()
         await games[ctx.author.id].update_message()
 
     @commands.command()
