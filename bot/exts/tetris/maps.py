@@ -21,10 +21,8 @@ class Maps(commands.Cog):
 
                 if char == ' ' or char == '_':
                     continue
-
                 if char == 'X' or char == 'G':
                     board[x, y] = 8
-
                 else:
                     try:
                         board[x, y] = Pieces[char].value
@@ -41,6 +39,10 @@ class Maps(commands.Cog):
             board, piece = Encoder.decode(encoded.strip('`'))
         except ValueError as e:
             raise commands.BadArgument('Invalid map string') from e
+
+        if piece is not None:
+            for x, y in piece.shape + piece.pos:
+                board[x, y] = piece.type
 
         await ctx.send(
             embed=discord.Embed(

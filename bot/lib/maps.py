@@ -64,7 +64,7 @@ class Encoder:
 
     @staticmethod
     def decode(encoded: str) -> (NDArray[np.int8], Optional[Piece]):
-        board, piece = encoded.split('@')
+        board, piece = encoded.split('@') if encoded[-1] != '@' else (encoded.rstrip('@'), None)
         if '~' in board:
             board, garbage = board.split('~')
         else:
