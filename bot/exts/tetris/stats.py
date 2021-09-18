@@ -1,3 +1,10 @@
+import datetime
+import gc
+import inspect
+import json
+import pathlib
+import psutil
+import sys
 from typing import Optional
 
 import discord
@@ -9,7 +16,34 @@ class Stats(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.db: TinyDB = bot.db
+        self.status_msg: discord.Message = None
         self.update_leaderboard.start()
+        self.update_status.start()
+
+    def cog_unload(self):
+        # mmmmMMm hacky code.. erh, here's what's up with it:
+        #  -> commands.Bot.close() unloads extensions before calling super().close() ...
+        #      So, that gives us time to do this
+        #  -> asyncio.AbstractEventLoop.create_task only keeps a weak reference to the task ...
+        #      Aaand since the function ends immediately after scheduling the task,
+        #      the task object is garbage collected, so the gc needs to be frozen...
+        #  -> to avoid triggering this when the cog is simply reloaded,
+        #      we check if this is being called from `super().close()`
+        # sorry!!!  ...i don't like it either
+        frames = inspect.getouterframes(sys._getframe())
+        if self.status_msg is not None and any('close' in i.frame.f_code.co_names for i in frames):
+            task = self.bot.loop.create_task(
+                self.status_msg.edit(
+                    embed=discord.Embed(
+                        color=0xfa5050,
+                        title='Current status',
+                        description='`Status :: Offline!`'
+                        # TODO: show shutdown time?
+                    )
+                )
+            )
+            gc.freeze()
+            task.add_done_callback(lambda *_: gc.unfreeze())
 
     @tasks.loop(minutes=5)
     async def update_leaderboard(self):
@@ -28,6 +62,46 @@ class Stats(commands.Cog):
 
     @update_leaderboard.before_loop
     async def before_update_leaderboard(self):
+        await self.bot.wait_until_ready()
+
+    @tasks.loop(minutes=15)
+    async def update_status(self):
+        await self.bot.change_presence(activity=discord.Game('Tetris || https://tetris-dsc.dzshn.xyz'))
+        if self.status_msg is None:
+            status_msg: dict[str, int] = self.bot.config.get('status_msg')
+            if status_msg is not None:
+                try:
+                    self.status_msg = await self.bot.get_channel(status_msg['ch']) \
+                                                    .fetch_message(status_msg['msg'])
+                except discord.NotFound:
+                    config = json.load(open('config.json'))
+                    del config['status_msg']
+                    json.dump(config, open('config.json', 'w'))
+                    self.bot.config = config
+            else:
+                return
+
+        proc = psutil.Process()
+        with proc.oneshot():
+            await self.status_msg.edit(
+                embed=discord.Embed(
+                    color=0xfa50a0,
+                    title='Current status',
+                    description=f'`Status :: Online!`\nStarted <t:{int(proc.create_time())}:R>',
+                    timestamp=datetime.datetime.now()
+                ).add_field(
+                    name='Data/usage',
+                    value=(
+                        f'`db.json` has `{pathlib.Path("db.json").stat().st_size / 1024:.2f}kb` of data\n'
+                        f'`{proc.memory_info().rss / 1024 / 1024:.2f} mb` of '
+                        f'`{psutil.virtual_memory().total / 1024 / 1024:.2f} mb` RAM has been allocated\n'
+                        f'`{proc.cpu_percent():.2f}%` CPU used in `{proc.num_threads()}` threads'
+                    )
+                ).set_footer(text='Updates every 15 minutes')
+            )
+
+    @update_status.before_loop
+    async def before_update_status(self):
         await self.bot.wait_until_ready()
 
     @commands.command()
@@ -65,6 +139,24 @@ class Stats(commands.Cog):
                 )
             else:
                 await ctx.send(f"Score for {table} doesn't exist!")
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def setpersiststs(self, ctx: commands.Context, channel: discord.TextChannel = None):
+        if channel is None:
+            channel = ctx.channel
+            await ctx.message.delete()
+
+        msg = await channel.send(
+            embed=discord.Embed(color=0xfa50a0, title='...!').set_image(
+                url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'
+            )
+        )
+        config = json.load(open('config.json'))
+        config['status_msg'] = {'ch': channel.id, 'msg': msg.id}
+        json.dump(config, open('config.json', 'w'))
+        self.bot.config = config
+        self.update_status.restart()
 
 
 def setup(bot: commands.Bot):
