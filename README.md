@@ -8,7 +8,7 @@ This is still a huge WIP, I'll add more info on it with time, for now you can jo
 
 * **Full board size**, there's not enough space for 20 lines if using custom emotes, so instead there are 16 (although pieces do spawn at rows 21-22)
 * ??????
-* i forgor
+* i forgor 💀
 
 
 ## What has been done (mostly)
