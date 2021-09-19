@@ -19,7 +19,7 @@ class Zen(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def autosave(self):
-        for author, view in self.bot.get_cog('Manager').games:
+        for author, view in self.bot.get_cog('Manager').games.items():
             if not isinstance(view.game, ZenGame):
                 continue
 
