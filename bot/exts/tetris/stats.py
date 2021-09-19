@@ -4,6 +4,7 @@ import inspect
 import json
 import pathlib
 import psutil
+import statistics
 import sys
 from typing import Optional
 
@@ -48,15 +49,13 @@ class Stats(commands.Cog):
     @tasks.loop(minutes=5)
     async def update_leaderboard(self):
         for table in ['zen']:
+            top = sorted(
+                ({'user_id': i['user_id'], 'score': i['score']} for i in self.db.table(table)),
+                key=lambda x: x['score'], reverse=True
+            )  # yapf: disable
+
             self.db.table('leaderboard').upsert(
-                {
-                    'table': table,
-                    'top':
-                        sorted(({
-                            'user_id': i['user_id'],
-                            'score': i['score']
-                        } for i in self.db.table(table)), key=lambda x: x['score'], reverse=True)
-                },
+                {'table': table, 'top': top, 'median': int(statistics.median(i['score'] for i in top))},
                 where('table') == table
             )  # yapf: disable
 
@@ -110,35 +109,36 @@ class Stats(commands.Cog):
             raise commands.BadArgument(':eye:')
 
         if mode is None:
-            await ctx.send(
-                embed=discord.Embed(
-                    color=0xfa50a0,
-                    title='Top scores on all modes',
-                    description='\n'.join(
-                        f'**{i["table"].title()}:**\n' +
-                        '\n'.join(f'\u200c · <@{j["user_id"]}>: **{j["score"]:,}**'
-                                  for j in i["top"][:3])
-                        for i in self.db.table('leaderboard')
+            embed = discord.Embed(color=0xfa50a0, title='Top scores on all modes')
+
+            for i in self.db.table('leaderboard'):
+                embed.add_field(
+                    name=i["table"].title(),
+                    value='\n'.join(
+                        '**#{}**: <@{user_id}>: **{score:,}**'.format(j + 1, **k)
+                        for j, k in enumerate(i['top'][:5])
                     )
                 )
-            )
+
+            await ctx.send(embed=embed)
 
         else:
-            table = mode.lower()
-            if self.db.table('leaderboard').contains(where('table') == table):
-                top = self.db.table('leaderboard').get(where('table') == table)['top']
+            table_name = mode.lower()
+            if self.db.table('leaderboard').contains(where('table') == table_name):
+                table = self.db.table('leaderboard').get(where('table') == table_name)
+                top = table['top']
                 await ctx.send(
                     embed=discord.Embed(
                         color=0xfa50a0,
-                        title=f'Top scores on {table}',
-                        description='\n'.join(
+                        title=f'Top scores on {table_name}',
+                        description=f'*Median score: **{table["median"]:,}***\n\n' + '\n'.join(
                             f'**#{i + 1 + page * 15}**: <@{j["user_id"]}>: **{j["score"]:,}**'
                             for i, j in enumerate(top[page * 15:(page + 1) * 15])
                         )
-                    ).set_footer(text=f'Page {page} of {len(top) // 15} · top {page} {table}')
+                    ).set_footer(text=f'Page {page} of {len(top) // 15} · top {page} {table_name}')
                 )
             else:
-                await ctx.send(f"Score for {table} doesn't exist!")
+                await ctx.send(f"Score for {table_name} doesn't exist!")
 
     @commands.command(hidden=True)
     @commands.is_owner()
