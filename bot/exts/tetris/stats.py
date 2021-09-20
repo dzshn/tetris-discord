@@ -104,8 +104,8 @@ class Stats(commands.Cog):
         await self.bot.wait_until_ready()
 
     @commands.command()
-    async def top(self, ctx: commands.Context, page: Optional[int] = 0, mode: Optional[str] = None):
-        if page < 0:
+    async def top(self, ctx: commands.Context, page: Optional[int] = 1, mode: Optional[str] = None):
+        if page < 1:
             raise commands.BadArgument(':eye:')
 
         if mode is None:
@@ -132,10 +132,10 @@ class Stats(commands.Cog):
                         color=0xfa50a0,
                         title=f'Top scores on {table_name}',
                         description=f'*Median score: **{table["median"]:,}***\n\n' + '\n'.join(
-                            f'**#{i + 1 + page * 15}**: <@{j["user_id"]}>: **{j["score"]:,}**'
-                            for i, j in enumerate(top[page * 15:(page + 1) * 15])
+                            f'**#{i + 1 + (page - 1) * 15}**: <@{j["user_id"]}>: **{j["score"]:,}**'
+                            for i, j in enumerate(top[(page - 1) * 15:page * 15])
                         )
-                    ).set_footer(text=f'Page {page} of {len(top) // 15} · top {page} {table_name}')
+                    ).set_footer(text=f'Page {page} of {len(top) // 15 + 1} · top {page} {table_name}')
                 )
             else:
                 await ctx.send(f"Score for {table_name} doesn't exist!")
