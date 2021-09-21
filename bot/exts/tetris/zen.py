@@ -1,9 +1,10 @@
 import discord
 from discord.ext import commands, tasks
-from tinydb import where
+from tinydb import TinyDB, where
 from tinydb.table import Table
 
-from bot.lib import Controls, Game
+from bot.lib.game import Game
+from bot.lib.controls import Controls
 from bot.lib.maps import Encoder
 
 
@@ -14,7 +15,8 @@ class ZenGame(Game):
 class Zen(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.db: Table = bot.db.table('zen')
+        self.db: TinyDB = bot.db
+        self.db_table: Table = bot.db.table('zen')
         self.autosave.start()
 
     @tasks.loop(minutes=5)
@@ -33,7 +35,7 @@ class Zen(commands.Cog):
                 'hold_lock': game.hold_lock
             }
 
-            self.db.upsert(save, where('user_id') == author)
+            self.db_table.upsert(save, where('user_id') == author)
 
     @autosave.before_loop
     async def before_autosave(self):
@@ -62,15 +64,19 @@ class Zen(commands.Cog):
             url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'
         )
         msg = await ctx.send(embed=embed)
-        game = ZenGame(self.bot.config)
-        if (save := self.db.get(where('user_id') == ctx.author.id)) is not None:
+        user_settings: dict[str, int] = self.db.table('settings').get(where('user_id') == ctx.author.id) or {}
+        user_controls = Controls.from_config(user_settings)
+        user_skin = self.bot.config['skins'][user_settings.get('skin', 0)]
+
+        game = ZenGame(user_skin['pieces'])
+        if (save := self.db_table.get(where('user_id') == ctx.author.id)) is not None:
             game.board, game.current_piece = Encoder.decode(save['board'])
             game.score = save['score']
             game.queue = save['queue']
             game.hold = save['hold']
             game.hold_lock = save['hold_lock']
 
-        view = Controls(game, ctx, msg)
+        view = user_controls(game, ctx, msg)
         games[ctx.author.id] = view
         await view.update_message()
         await view.wait()
@@ -84,7 +90,7 @@ class Zen(commands.Cog):
             'hold_lock': game.hold_lock
         }
 
-        self.db.upsert(save, where('user_id') == ctx.author.id)
+        self.db_table.upsert(save, where('user_id') == ctx.author.id)
 
         del games[ctx.author.id]
 

@@ -1,6 +1,7 @@
 import discord
 import numpy as np
 from discord.ext import commands
+from tinydb import where
 
 from bot.lib import Game, Pieces
 from bot.lib.maps import Encoder
@@ -41,14 +42,21 @@ class Maps(commands.Cog):
             raise commands.BadArgument('Invalid map string') from e
 
         if piece is not None:
+            ghost = piece.copy()
+            ghost.x += 30
+            for x, y in ghost.shape + ghost.pos:
+                board[x, y] = 9
+
             for x, y in piece.shape + piece.pos:
                 board[x, y] = piece.type
+
+        user_skin = self.bot.db.table('settings').get(where('user_id') == ctx.author.id).get('skin', 0)
 
         await ctx.send(
             embed=discord.Embed(
                 color=0xfa50a0,
                 description='\n'.join(
-                    ''.join(self.bot.config['emotes']['pieces'][j] for j in i) for i in board[-16:]
+                    ''.join(self.bot.config['skins'][user_skin]['pieces'][j] for j in i) for i in board[-16:]
                 )
             )
         )

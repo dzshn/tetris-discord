@@ -2,7 +2,6 @@ import enum
 import itertools
 import math
 import random
-from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -104,8 +103,8 @@ class Piece:
 
 
 class Game:
-    def __init__(self, config: dict[str, Any]):
-        self.emotes: list[str] = config['emotes']['pieces']
+    def __init__(self, emotes: list[str]):
+        self.emotes = emotes
         self.board = np.zeros((30, 10), dtype=np.int8)
         self._queue = self._queue_iter()
         self.current_piece = Piece(self.board, next(self._queue))
