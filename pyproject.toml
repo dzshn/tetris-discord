@@ -16,7 +16,7 @@ psutil = "^5.8.0"
 yapf = "^0.31.0"
 toml = "^0.10.2"
 flake8 = "^3.9.2"
-rope = "^0.19.0"
+rope = "^0.20.1"
 
 [tool.yapf]
 based_on_style = "google"
