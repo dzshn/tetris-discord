@@ -9,7 +9,7 @@ license = "MIT"
 python = "^3.9,<3.11"
 "discord.py" = {git = "https://github.com/Rapptz/discord.py"}
 numpy = "^1.21.2"
-tinydb = "^4.5.1"
+tinydb = "^4.5.2"
 psutil = "^5.8.0"
 
 [tool.poetry.dev-dependencies]
