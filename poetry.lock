@@ -155,7 +155,7 @@ dev = ["pytest", "pytest-timeout"]
 
 [[package]]
 name = "tinydb"
-version = "4.5.1"
+version = "4.5.2"
 description = "TinyDB is a tiny, document oriented database optimized for your happiness :)"
 category = "main"
 optional = false
@@ -200,7 +200,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "32d75e3082535b4dccec8269351b3aeecf2a719bb5acbc4d1d0669050ded8855"
+content-hash = "390bd53264e8ac9dc38037520f8746861e91b4029d9ca409e2e82ea7db47d6ef"
 
 [metadata.files]
 aiohttp = [
@@ -380,8 +380,8 @@ rope = [
     {file = "rope-0.20.1.tar.gz", hash = "sha256:505a2f6b4ac7b18e0429be179f4d8712243a194da5c866b0731f9d91ce7590bb"},
 ]
 tinydb = [
-    {file = "tinydb-4.5.1-py3-none-any.whl", hash = "sha256:99529ea4d5d4b7a3fd4b3f50b48b5023c31d6f7a4a87bb103b4abd1d959d93b9"},
-    {file = "tinydb-4.5.1.tar.gz", hash = "sha256:b780bceac6e37573b10fbcab6bcebb6b8bd5d8a0024533b5a452d9ef83465783"},
+    {file = "tinydb-4.5.2-py3-none-any.whl", hash = "sha256:3c5e5c72c98db07e707be4e25f9e135a8a14b96938e4745b1b7187fec523ff58"},
+    {file = "tinydb-4.5.2.tar.gz", hash = "sha256:7d18b2d0217827c188f177cd23df60e5cd5316a717e836a8e21c8c2488262cf5"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
