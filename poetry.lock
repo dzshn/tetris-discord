@@ -178,6 +178,24 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "yade"
+version = "0.1.0"
+description = "Yet another debug extension for dpy"
+category = "main"
+optional = false
+python-versions = "^3.9"
+develop = false
+
+[package.dependencies]
+"discord.py" = {git = "https://github.com/Rapptz/discord.py", branch = "master"}
+
+[package.source]
+type = "git"
+url = "https://github.com/dzshn/yade"
+reference = "main"
+resolved_reference = "4796f8e3ff5c3d34ba565772e5a2ef8ce8714482"
+
+[[package]]
 name = "yapf"
 version = "0.31.0"
 description = "A formatter for Python code."
@@ -200,7 +218,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "390bd53264e8ac9dc38037520f8746861e91b4029d9ca409e2e82ea7db47d6ef"
+content-hash = "0adef47909dc8ab1ff53f3f3b09c74d207d22f229f7fc86d0477d885d0f03a92"
 
 [metadata.files]
 aiohttp = [
@@ -392,6 +410,7 @@ typing-extensions = [
     {file = "typing_extensions-3.10.0.2-py3-none-any.whl", hash = "sha256:f1d25edafde516b146ecd0613dabcc61409817af4766fbbcfb8d1ad4ec441a34"},
     {file = "typing_extensions-3.10.0.2.tar.gz", hash = "sha256:49f75d16ff11f1cd258e1b988ccff82a3ca5570217d7ad8c5f48205dd99a677e"},
 ]
+yade = []
 yapf = [
     {file = "yapf-0.31.0-py2.py3-none-any.whl", hash = "sha256:e3a234ba8455fe201eaa649cdac872d590089a18b661e39bbac7020978dd9c2e"},
     {file = "yapf-0.31.0.tar.gz", hash = "sha256:408fb9a2b254c302f49db83c59f9aa0b4b0fd0ec25be3a5c51181327922ff63d"},

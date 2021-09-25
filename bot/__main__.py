@@ -29,6 +29,8 @@ class TetrisBot(commands.Bot):
             case_insensitive=True,
         )
 
+        self.load_extension('yade')
+
         def _imp_err(name: str):
             raise ImportError(name=name)
 
