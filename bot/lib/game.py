@@ -1,12 +1,12 @@
 import enum
-import itertools
 import math
 import random
+from typing import Optional
 
 import numpy as np
 from numpy.typing import NDArray
 
-from bot.lib.consts import SHAPES, SRS_KICKS
+from bot.lib.consts import SHAPES, SRS_KICKS, SRS_I_KICKS
 
 Pieces = enum.Enum('PIECES', 'I L J S Z T O')
 
@@ -59,7 +59,8 @@ class Piece:
         value %= 4
         previous = self._rot
         if Piece(self.board, self.type, self.x, self.y, value).overlaps():
-            for x, y in SRS_KICKS[previous][value]:
+            kick_table = SRS_I_KICKS if self.type == Pieces.I else SRS_KICKS
+            for x, y in kick_table[previous][value]:
                 if not Piece(self.board, self.type, self.x + x, self.y + y, value).overlaps():
                     self.pos = (self.x + x, self.y + y)
                     break
