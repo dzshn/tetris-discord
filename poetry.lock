@@ -193,7 +193,7 @@ develop = false
 type = "git"
 url = "https://github.com/dzshn/yade"
 reference = "main"
-resolved_reference = "4796f8e3ff5c3d34ba565772e5a2ef8ce8714482"
+resolved_reference = "96cb4c45b05a2ca44ab650f0ca17d7e42a7c5917"
 
 [[package]]
 name = "yapf"
