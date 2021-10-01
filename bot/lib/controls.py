@@ -36,7 +36,9 @@ class Controls(discord.ui.View):
         embed.add_field(
             name='Hold', value=f'`{Pieces(self.game.hold).name}`' if self.game.hold is not None else '`None`'
         )
-        embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in self.game.queue))
+        embed.add_field(
+            name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in self.game.queue.next_pieces)
+        )
         embed.add_field(
             name='Score', value=f'**{self.game.score:,}**\n+{self.game.score - self.game.previous_score}'
         )

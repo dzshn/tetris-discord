@@ -1,15 +1,40 @@
 import discord
+import numpy as np
 from discord.ext import commands, tasks
 from tinydb import TinyDB, where
 from tinydb.table import Table
 
-from bot.lib.game import Game
+from bot.lib.game import Game, Piece, Queue
 from bot.lib.controls import Controls
 from bot.lib.maps import Encoder
 
 
 class ZenGame(Game):
-    pass
+    def __init__(self, save, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.queue = Queue(initial_queue=save.get('queue', []), initial_bag=save.get('bag', []))
+        if save.get('board') is not None:
+            self.board, self.current_piece = Encoder.decode(save['board'])
+        else:
+            self.board = np.zeros((30, 10), dtype=np.int8)
+            self.current_piece = Piece(self.board, self.queue.pop())
+
+        self.score: int = save.get('score', 0)
+        self.hold = save.get('hold', None)
+        self.hold_lock = save.get('hold_lock', False)
+        self.previous_score = self.score
+        self.can_pc = self.board.any()
+
+    def to_save(self) -> dict:
+        return {
+            'board': Encoder.encode(self.board, self.current_piece),
+            'score': self.score,
+            'queue': self.queue.next_pieces,
+            'bag': self.queue.current_bag,
+            'hold': self.hold,
+            'hold_lock': self.hold_lock
+        }
 
 
 class Zen(commands.Cog):
@@ -25,17 +50,7 @@ class Zen(commands.Cog):
             if not isinstance(view.game, ZenGame):
                 continue
 
-            game: ZenGame = view.game
-            save = {
-                'user_id': author,
-                'board': Encoder.encode(game.board, game.current_piece),
-                'score': game.score,
-                'queue': game.queue,
-                'hold': game.hold,
-                'hold_lock': game.hold_lock
-            }
-
-            self.db_table.upsert(save, where('user_id') == author)
+            self.db_table.upsert(view.game.to_save(), where('user_id') == author)
 
     @autosave.before_loop
     async def before_autosave(self):
@@ -66,31 +81,16 @@ class Zen(commands.Cog):
         msg = await ctx.send(embed=embed)
         user_settings: dict[str, int] = self.db.table('settings').get(where('user_id') == ctx.author.id) or {}
         user_controls = Controls.from_config(user_settings)
-        user_skin = self.bot.config['skins'][user_settings.get('skin', 0)]
 
-        game = ZenGame(user_skin['pieces'])
-        if (save := self.db_table.get(where('user_id') == ctx.author.id)) is not None:
-            game.board, game.current_piece = Encoder.decode(save['board'])
-            game.score = save['score']
-            game.queue = save['queue']
-            game.hold = save['hold']
-            game.hold_lock = save['hold_lock']
-
+        game = ZenGame(
+            self.db_table.get(where('user_id') == ctx.author.id) or {}, self.bot.config, user_settings
+        )
         view = user_controls(game, ctx, msg)
         games[ctx.author.id] = view
         await view.update_message()
         await view.wait()
 
-        save = {
-            'user_id': ctx.author.id,
-            'board': Encoder.encode(game.board, game.current_piece),
-            'score': game.score,
-            'queue': game.queue,
-            'hold': game.hold,
-            'hold_lock': game.hold_lock
-        }
-
-        self.db_table.upsert(save, where('user_id') == ctx.author.id)
+        self.db_table.upsert(game.to_save(), where('user_id') == ctx.author.id)
 
         del games[ctx.author.id]
 

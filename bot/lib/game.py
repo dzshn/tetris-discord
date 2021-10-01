@@ -102,29 +102,58 @@ class Piece:
         return Piece(self.board, self.type, self.x + x, self.y + y, self.rot)
 
 
+class Queue:
+    def __init__(self, initial_queue: list[int] = [], initial_bag: list[int] = []):
+        self._queue = initial_queue[:4]
+        self._bag = initial_bag or [i.value for i in Pieces if i.value not in initial_queue]
+        for _ in range(4):
+            if len(self._queue) < 4:
+                self._queue.append(self._next_piece())
+
+    def _next_piece(self) -> int:
+        if not self._bag:
+            self._bag = [i.value for i in Pieces]
+            random.shuffle(self._bag)
+
+        return self._bag.pop()
+
+    @property
+    def next_pieces(self) -> list[int]:
+        return self._queue.copy()
+
+    @property
+    def current_bag(self) -> list[int]:
+        return self._bag.copy()
+
+    def pop(self) -> int:
+        piece = self._queue.pop(0)
+        self._queue.append(self._next_piece())
+        return piece
+
+
 class Game:
-    def __init__(self, emotes: list[str]):
-        self.emotes = emotes
+    def __init__(self, config: dict, user_settings: dict):
+        self.emotes = config['skins'][user_settings.get('skin', 0)]['pieces']
+        self.queue = Queue()
         self.board = np.zeros((30, 10), dtype=np.int8)
-        self._queue = self._queue_iter()
-        self.current_piece = Piece(self.board, next(self._queue))
-        self.queue = list(itertools.islice(self._queue, 4))
-        self.hold = None
+        self.current_piece = Piece(self.board, self.queue.pop())
+        self.score = 0
+        self.hold: Optional[int] = None
         self.hold_lock = False
+        self.previous_score = 0
         self.combo = 0
         self.b2b = 0
-        self.score = 0
-        self.previous_score = 0
         self.spun = False
         self.kick_x = 0
-        self.action_text: str = None
+        self.action_text: Optional[str] = None
         self.can_pc = False
 
     def reset(self):
+        self.queue = Queue()
         self.board = np.zeros((30, 10), dtype=np.int8)
-        self._queue = self._queue_iter()
-        self.current_piece = Piece(self.board, next(self._queue))
-        self.queue = list(itertools.islice(self._queue, 4))
+        self.current_piece = Piece(self.board, self.queue.pop())
+        self.previous_score = self.score
+        self.kick_x = 0
         self.hold = None
         self.hold_lock = False
         self.combo = 0
@@ -132,15 +161,6 @@ class Game:
         self.spun = False
         self.action_text: str = None
         self.can_pc = False
-
-    def _queue_iter(self) -> int:
-        current_bag = []
-        while True:
-            if not current_bag:
-                current_bag = [i.value for i in Pieces]
-                random.shuffle(current_bag)
-
-            yield current_bag.pop()
 
     def lock_piece(self):
         if not self.can_pc:
@@ -252,8 +272,7 @@ class Game:
                 self.reset()
                 self.action_text = 'Top out!'
 
-        self.current_piece = Piece(self.board, self.queue.pop(0))
-        self.queue.append(next(self._queue))
+        self.current_piece = Piece(self.board, self.queue.pop())
         self.hold_lock = False
 
         if self.current_piece.overlaps():
@@ -294,8 +313,7 @@ class Game:
     def swap(self):
         if self.hold is None:
             self.hold = self.current_piece.type
-            self.current_piece = Piece(self.board, self.queue.pop(0))
-            self.queue.append(next(self._queue))
+            self.current_piece = Piece(self.board, self.queue.pop())
 
         else:
             self.hold, self.current_piece = self.current_piece.type, Piece(self.board, self.hold)
