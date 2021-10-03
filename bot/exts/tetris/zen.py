@@ -90,7 +90,7 @@ class Zen(commands.Cog):
         await view.update_message()
         await view.wait()
 
-        self.db_table.upsert(game.to_save(), where('user_id') == ctx.author.id)
+        self.db_table.upsert(game.to_save() | {'user_id': ctx.author.id}, where('user_id') == ctx.author.id)
 
         del games[ctx.author.id]
 
