@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="author" content="@dzshn" />
+        <meta name="theme-color" content="#fa50a0" />
+        <meta
+            name="description"
+            content="A nearly guideline-compliant tetris clone, on a discord bot"
+        />
+        <meta name="twitter:title" content="tetris-discord" />
+        <meta
+            name="twitter:description"
+            content="A nearly guideline-compliant tetris clone, on a discord bot"
+        />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:creator" content="@dzshn_" />
+        <meta name="twitter:image" content="/icon.png" />
+        <link rel="icon" href="favicon.ico" type="image/x-icon" />
+        <link rel="stylesheet" href="/main.css" media="screen" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Noto+Sans+Display:ital,wght@0,400;0,700;1,400&family=Noto+Sans+JP&display=swap"
+            rel="stylesheet"
+        />
+        <title>tetris-discord</title>
+        <script src="https://unpkg.com/vue@next/dist/vue.global.prod.js"></script>
+        <script src="https://unpkg.com/vue-router@4/dist/vue-router.global.prod.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    </head>
+    <body>
+        <noscript>
+            <h1>
+                Seems like you have javascript disabled!; the documentation
+                requires vue.js to run
+            </h1>
+            <br />
+            <h1>hi :D</h1>
+            <p>
+                <b id="welcome">Welcome!</b> this page aggregates info about
+                <b>tetris-discord</b>, an almost-guideline-compliant tetris
+                clone that runs on a discord bot!
+            </p>
+            <p class="firsttime">
+                If it's your first time hearing about this, check out these
+                links!
+            </p>
+            <div id="links">
+                <a
+                    rel="noreferrer noopener"
+                    target="_blank"
+                    href="https://discord.gg/ytJj3eQ74B"
+                >
+                    Discord server
+                </a>
+                <a
+                    rel="noreferrer noopener"
+                    target="_blank"
+                    href="https://github.com/dzshn/tetris-discord"
+                >
+                    Github repo
+                </a>
+                <a
+                    rel="noreferrer noopener"
+                    target="_blank"
+                    href="https://discord.com/api/oauth2/authorize?client_id=883520648553594920&permissions=116736&scope=bot%20applications.commands"
+                >
+                    Bot invite
+                </a>
+                <a
+                    rel="noreferrer noopener"
+                    target="_blank"
+                    href="https://www.patreon.com/dzshn"
+                >
+                    Patreon
+                </a>
+            </div>
+            <footer>
+                <i>
+                    Copyright (c) 2021 Sofia "dzshn" N. L.
+                </i>
+                <i>
+                    <a
+                        rel="noreferrer noopener"
+                        target="_blank"
+                        href="https://github.com/dzshn/tetris-discord/blob/main/LICENSE"
+                    >
+                        MIT License
+                    </a>
+                </i>
+            </footer>
+        </noscript>
+        <div id="app">
+            <router-view></router-view>
+        </div>
+        <script src="/main.js"></script>
+    </body>
+</html>
