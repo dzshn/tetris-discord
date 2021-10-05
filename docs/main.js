@@ -155,7 +155,7 @@ const Footer = {
 }
 
 const router = VueRouter.createRouter({
-    history: VueRouter.createHashHistory(),
+    history: VueRouter.createWebHistory(),
     routes: [
         { path: '/', component: Home },
         { path: '/index', component: Index },
