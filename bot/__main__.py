@@ -28,7 +28,7 @@ class TetrisBot(commands.Bot):
             allowed_mentions=discord.AllowedMentions(
                 everyone=False, users=True, roles=False, replied_user=True
             ),
-            command_prefix=commands.when_mentioned_or('tt!'),
+            command_prefix=commands.when_mentioned_or(self.config['prefix']),
             case_insensitive=True,
         )
 
