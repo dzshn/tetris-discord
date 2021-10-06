@@ -50,7 +50,10 @@ class Zen(commands.Cog):
             if not isinstance(view.game, ZenGame):
                 continue
 
-            self.db_table.upsert(view.game.to_save(), where('user_id') == author)
+            self.db_table.upsert(
+                view.game.to_save() | {'user_id': view.ctx.author.id},
+                where('user_id') == author
+            )
 
     @autosave.before_loop
     async def before_autosave(self):
