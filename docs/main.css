@@ -4,7 +4,6 @@ body {
     font-family: 'Noto Sans Display', 'Noto Sans JP', sans-serif;
     height: 100%;
     margin: 0;
-    overflow: hidden;
     padding-top: 16vh;
     text-align: center;
     width: 100%;
@@ -19,13 +18,12 @@ body {
     width: 40%;
     margin-bottom: 20px;
 }
-#links {
+.links {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
 }
-#links a,
-.btn {
+.links a {
     border-radius: 4px;
     color: #fafafa;
     background: #fa50a0;
@@ -33,9 +31,11 @@ body {
     padding: 5px 10px;
     transition-duration: 100ms;
     transition-delay: 40ms;
+    flex-basis: 0;
+    flex-grow: 1;
+    white-space: nowrap;
 }
-#links a:hover,
-.btn:hover {
+.links a:hover {
     background: #fb69ad;
     transform: translateY(-5px);
 }
@@ -63,11 +63,44 @@ p {
     padding: 0 4%;
     text-align: left;
 }
-.btn {
-    font-size: large;
-    margin-top: 8px !important;
-}
 .mono {
     color: #e0e0e0;
     font-family: 'Fira Code', monospace;
+}
+.loading {
+    background: rgba(100%, 100%, 100%, 7%);
+    margin: 10px;
+    padding: 6px 20px;
+    border-radius: 15px;
+    display: inline-block;
+    color: #e0e0e0;
+    font-family: 'Fira Code', monospace;
+    animation: 1s infinite loading-pulse alternate ease;
+}
+.loading::after {
+    content: '';
+    margin: 0 0.2em;
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    border: 0.2em solid #f0f0f0;
+    border-left-color: transparent;
+    border-radius: 100%;
+    animation: 1s infinite loading-spinner linear;
+}
+@keyframes loading-spinner {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+@keyframes loading-pulse {
+    from {
+        background: rgba(100%, 100%, 100%, 7%);
+    }
+    to {
+        background: rgba(100%, 100%, 100%, 12%);
+    }
 }

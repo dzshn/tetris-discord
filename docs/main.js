@@ -19,7 +19,7 @@ const Home = {
     <p v-if="firstVisit">
         If it's your first time hearing about this, check out these links!
     </p>
-    <div id="links">
+    <div class="links">
         <a
             rel="noreferrer noopener"
             target="_blank"
@@ -48,8 +48,14 @@ const Home = {
         >
             Patreon
         </a>
-        <router-link to="/index" class="btn">View documentation</router-link>
-        <router-link to="/changelog" class="btn">Changelog</router-link>
+    </div>
+    <div class="links">
+        <router-link to="/index">
+            Documentation
+        </router-link>
+        <router-link to="/changelog">
+            Changelog
+        </router-link>
     </div>
     <Footer/>
     `,
@@ -83,7 +89,7 @@ const Index = {
 const DocPage = {
     data() {
         return {
-            content: '<h1 class="mono">Loading...</h1>'
+            content: '<i class="loading">Loading...</i>'
         }
     },
     mounted() {
