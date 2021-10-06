@@ -35,11 +35,13 @@ class Manager(commands.Cog):
                     '```'
                 )
                 if pull_option != 'forcepull':
-                    reply = (await self.bot.wait_for(
-                        'message',
-                        check=lambda m: m.author == ctx.author and m.channel == ctx.channel,
-                        timeout=60
-                    )).content.lower()
+                    reply = (
+                        await self.bot.wait_for(
+                            'message',
+                            check=lambda m: m.author == ctx.author and m.channel == ctx.channel,
+                            timeout=60
+                        )
+                    ).content.lower()
                     do_pull = reply in ('y', 'yes')
                 else:
                     do_pull = True

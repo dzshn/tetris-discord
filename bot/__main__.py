@@ -19,7 +19,10 @@ class TetrisBot(commands.Bot):
             open('config.json', 'w').write(open('config_defaults.json').read())
 
         self.config = json.load(open('config_defaults.json')) | json.load(open('config.json'))
-        self.db = TinyDB('db.json', storage=CachingMiddleware(JSONStorage))
+        storage = CachingMiddleware(JSONStorage)
+        # TEMP: This isn't ideal; maybe a time-based subclass instead?
+        storage.WRITE_CACHE_SIZE = 16  # (also, the default is insanely big for this; 1000 ops)
+        self.db = TinyDB('db.json', storage=storage)
 
         super().__init__(
             allowed_mentions=discord.AllowedMentions(
