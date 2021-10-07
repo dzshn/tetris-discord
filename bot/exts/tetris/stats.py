@@ -54,10 +54,13 @@ class Stats(commands.Cog):
                 key=lambda x: x['score'], reverse=True
             )  # yapf: disable
 
-            self.db.table('leaderboard').upsert(
-                {'table': table, 'top': top, 'median': int(statistics.median(i['score'] for i in top))},
-                where('table') == table
-            )  # yapf: disable
+            if top:
+                self.db.table('leaderboard').upsert(
+                    {'table': table, 'top': top, 'median': int(statistics.median(i['score'] for i in top))},
+                    where('table') == table
+                )  # yapf: disable
+            else:
+                self.db.table('leaderboard').remove(where('table') == table)
 
     @update_leaderboard.before_loop
     async def before_update_leaderboard(self):
