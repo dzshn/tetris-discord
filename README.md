@@ -13,7 +13,7 @@ Also, for development progress you can check the [v1.0.0 project](https://github
 1. [Setup](#setup)
 2. [How](#how)
 3. [Credits](#credits)
-4. [Missing guideline stuff](#what-s-missing-from-guidelines)
+4. [Missing guideline stuff](#whats-missing-from-guidelines)
 
 ## Setup
 
