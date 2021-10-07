@@ -30,6 +30,10 @@ And of course, a discord bot token, create one [here](https://discord.com/develo
 
 Simply run `poetry install`.
 
+**Set the token:**
+
+Create a new file named `TOKEN` on the project's root and write the bot token into it
+
 **Edit your config** _(optional)_:
 
 If you skip this option, `config_defaults.json` will be copied automatically to `config.json`
