@@ -44,7 +44,7 @@ class Settings(commands.Cog):
 
         default = {'skin': 0, 'controls': 0}
         names: dict[str, list[str]] = {
-            'skin': self.config['skin_names'],
+            'skin': [i['name'] for i in self.config['skins']],
             'controls': ['basic', 'advanced', 'compact']
         }
         user_settings: dict[str, int] = (default | self.db.table('settings').get(query))

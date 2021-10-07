@@ -1,10 +1,8 @@
 {
     "prefix": "tt!",
-    "skin_names": [
-        "default"
-    ],
     "skins": [
         {
+            "name": "default",
             "pieces": [
                 "⬛",
                 "🟦",
