@@ -1,0 +1,21 @@
+name: Lint project
+
+on: [pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install poetry
+      run: curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+
+    - name: Lint with flake8 & yapf
+      run: |
+        poetry run flake8 . --format="::error file=%(path)s,line=%(row)d,col=%(col)d::[%(code)s] %(text)s"
+        poetry run yapf -dr . | awk "/^---/ { print \"::error file=\" \$2 \"::File doesn't have project formatting\" }"
