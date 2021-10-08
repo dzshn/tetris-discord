@@ -1,7 +1,8 @@
+import dataclasses
 import enum
 import math
 import random
-from typing import Optional
+from typing import NamedTuple, Optional, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -11,12 +12,70 @@ from bot.lib.consts import SHAPES, SRS_KICKS, SRS_I_KICKS
 Pieces = enum.Enum('PIECES', 'I L J S Z T O')
 
 
+class Position(NamedTuple):
+    x: int = 0
+    y: int = 0
+
+    def __add__(self, other: tuple) -> 'Position':
+        if not isinstance(other, tuple):
+            return NotImplemented
+
+        x, y = other
+        return Position(x=self.x + x, y=self.y + y)
+
+
+@dataclasses.dataclass()
+class Frame:
+    pos: Position
+    rot: int
+
+    @property
+    def x(self) -> int:
+        return self.pos.x
+
+    @property
+    def y(self) -> int:
+        return self.pos.y
+
+    def __add__(self, other: Union['Frame']) -> 'FrameDelta':
+        if not isinstance(other, Frame):
+            return NotImplemented
+
+        return FrameDelta(previous=self, current=other)
+
+
+@dataclasses.dataclass()
+class FrameDelta:
+    previous: Frame
+    current: Frame
+
+    @property
+    def x(self) -> int:
+        return self.current.x - self.previous.x
+
+    @property
+    def y(self) -> int:
+        return self.current.y - self.previous.y
+
+    @property
+    def rotation(self) -> int:
+        return self.current.rot - self.previous.rot
+
+
 class Piece:
     def __init__(self, board: NDArray[np.int8], t: int, x: int = 10, y: int = 3, r: int = 0):
         self.board = board
         self.type = t
-        self.pos = (x, y)
+        self.pos = Position(x, y)
         self._rot = r
+        self.frame = Frame(pos=self.pos, rot=self.rot)
+        self.delta = None
+
+    def new_frame(self):
+        new = Frame(pos=self.pos, rot=self.rot)
+        if new != self.frame:
+            self.delta = self.frame + Frame(pos=self.pos, rot=self.rot)
+            self.frame = new
 
     @property
     def x(self) -> int:
@@ -32,7 +91,8 @@ class Piece:
 
             target += step
 
-        self.pos = (target, self.y)
+        self.pos = Position(target, self.y)
+        self.new_frame()
 
     @property
     def y(self) -> int:
@@ -48,7 +108,8 @@ class Piece:
 
             target += step
 
-        self.pos = (self.x, target)
+        self.pos = Position(self.x, target)
+        self.new_frame()
 
     @property
     def rot(self) -> int:
@@ -62,12 +123,13 @@ class Piece:
             kick_table = SRS_I_KICKS if self.type == Pieces.I else SRS_KICKS
             for x, y in kick_table[previous][value]:
                 if not Piece(self.board, self.type, self.x + x, self.y + y, value).overlaps():
-                    self.pos = (self.x + x, self.y + y)
+                    self.pos = Position(self.x + x, self.y + y)
                     break
             else:
                 return
 
         self._rot = value
+        self.new_frame()
 
     @property
     def shape(self) -> NDArray[np.int8]:
@@ -92,15 +154,17 @@ class Piece:
 
     def __add__(self, other):
         if isinstance(other, tuple):
-            x, y = other
+            other_pos = other
 
         elif isinstance(other, Piece):
-            x, y = other.pos
+            other_pos = other.pos
 
         else:
             return NotImplemented
 
-        return Piece(self.board, self.type, self.x + x, self.y + y, self.rot)
+        x, y = self.pos + other_pos
+
+        return Piece(self.board, self.type, x, y, self.rot)
 
 
 class Queue:
@@ -144,8 +208,6 @@ class Game:
         self.previous_score = 0
         self.combo = 0
         self.b2b = 0
-        self.spun = False
-        self.kick_x = 0
         self.action_text: Optional[str] = None
         self.can_pc = False
 
@@ -154,12 +216,10 @@ class Game:
         self.board = np.zeros((30, 10), dtype=np.int8)
         self.current_piece = Piece(self.board, self.queue.pop())
         self.previous_score = self.score
-        self.kick_x = 0
         self.hold = None
         self.hold_lock = False
         self.combo = 0
         self.b2b = 0
-        self.spun = False
         self.action_text: str = None
         self.can_pc = False
 
@@ -190,7 +250,7 @@ class Game:
                 corners = 3
                 corners += self.board[x, y] != 0
 
-            if corners >= 3 and self.spun:
+            if corners >= 3 and self.current_piece.delta.rotation:
                 tspin = True
                 front_corner_offsets = [
                     ((x, x), (y, y + 2)),          # ▒▒██▒▒ <- these corners
@@ -202,7 +262,7 @@ class Game:
                 # Only is a mini if a front corner isn't present and it wasn't a X -> +2 kick
                 mini_spin = not np.all(
                     self.board[front_corner_offsets[self.current_piece.rot]] != 0
-                ) and self.kick_x < 2
+                ) and self.current_piece.delta.x < 2
 
         line_clears = 0
         for row, clear in enumerate(self.board.all(1)):
@@ -295,21 +355,16 @@ class Game:
 
     def drop(self, height: int):
         self.current_piece.x += height
-        self.spun = False
 
     def hard_drop(self):
-        prev_x = self.current_piece.x
         self.current_piece.x += 30
         self.previous_score = self.score
-        self.score += (self.current_piece.x - prev_x) * 2
-        if self.current_piece.x > prev_x:
-            self.spun = False
+        self.score += self.current_piece.delta.x * 2
         self.lock_piece()
 
     def soft_drop(self):
-        prev_x = self.current_piece.x
         self.drop(5)
-        self.score += self.current_piece.x - prev_x
+        self.score += self.current_piece.delta.x
 
     def swap(self):
         if self.hold is None:
@@ -322,14 +377,7 @@ class Game:
         self.hold_lock = True
 
     def rotate(self, turns: int):
-        prev_pos = self.current_piece.pos
-        prev_rot = self.current_piece.rot
         self.current_piece.rot += turns
-        self.spun = prev_rot != self.current_piece.rot
-        self.kick_x = self.current_piece.x - prev_pos[0]
 
     def drag(self, dist: int):
-        prev_y = self.current_piece.y
         self.current_piece.y += dist
-        if self.current_piece.y != prev_y:
-            self.spun = False
