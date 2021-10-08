@@ -65,13 +65,14 @@ It is currently very subject to change and possibly confusing to go through, but
 Most important modules are:
 
 -   `bot/exts/*` ~ the actual d.py extensions that have all the commands
+-   `bot/exts/modes/*` ~ these create the games
 -   `bot/lib/game.py` ~ this is the actual game object, which other modes inherit from and manage via the commands
 -   `bot/lib/controls.py` ~ the `discord.View` objects with callbacks to controlling the game objects
 
 As well as other core stuff:
 
--   `bot/exts/tetris/manager.py` ~ currently handles updating the bot and closing games
--   `bot/exts/tetris/settings.py` ~ handles editing user settings
+-   `bot/exts/manager.py` ~ currently handles updating the bot and closing games
+-   `bot/exts/settings.py` ~ handles editing user settings
 -   `bot/lib/maps.py` ~ currently the format used for saving boards (i.e. in zen mode)
 
 There is also another external module, [yade](https://github.com/dzshn/yade), which is an project of mine with some quite useful commands for debugging, all of them are owner-only:
