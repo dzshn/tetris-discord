@@ -171,7 +171,7 @@ class Piece:
 class Queue:
     def __init__(self, initial_queue: list[int] = [], initial_bag: list[int] = []):
         self._queue = initial_queue[:4]
-        self._bag = initial_bag or [i.value for i in Pieces if i.value not in initial_queue]
+        self._bag = initial_bag
         for _ in range(4):
             if len(self._queue) < 4:
                 self._queue.append(self._next_piece())
