@@ -382,3 +382,6 @@ class Game:
 
     def drag(self, dist: int):
         self.current_piece.y += dist
+
+    def to_save(self):
+        return NotImplemented
