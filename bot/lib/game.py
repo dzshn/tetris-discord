@@ -1,8 +1,8 @@
 import dataclasses
 import enum
 import math
-import random
-from typing import NamedTuple, Optional, Union
+from random import SystemRandom
+from typing import NamedTuple, Optional
 
 import numpy as np
 from numpy.typing import NDArray
@@ -10,6 +10,7 @@ from numpy.typing import NDArray
 from bot.lib.consts import SHAPES, SRS_KICKS, SRS_I_KICKS
 
 Pieces = enum.Enum('PIECES', 'I L J S Z T O')
+random = SystemRandom()
 
 
 class Position(NamedTuple):
@@ -37,7 +38,7 @@ class Frame:
     def y(self) -> int:
         return self.pos.y
 
-    def __add__(self, other: Union['Frame']) -> 'FrameDelta':
+    def __add__(self, other: 'Frame') -> 'FrameDelta':
         if not isinstance(other, Frame):
             return NotImplemented
 
