@@ -20,7 +20,14 @@ jobs:
               run: |
                   poetry install
 
-            - name: Lint with flake8 & yapf
+            - name: Lint with flake8
               run: |
                   poetry run flake8 . --format="::error file=%(path)s,line=%(row)d,col=%(col)d::[%(code)s] %(text)s"
+
+            - name: Lint with yapf
+              run: |
                   poetry run yapf -dr . | awk "/^---/ { print \"::error file=\" \$2 \"::File doesn't have project formatting\" }"
+
+            - name: Lint with isort
+              run: |
+                  poetry run isort . --check --quiet
