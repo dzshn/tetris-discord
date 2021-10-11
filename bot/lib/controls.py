@@ -28,20 +28,7 @@ class Controls(discord.ui.View):
 
     async def update_message(self):
         self.swap.disabled = self.game.hold_lock
-        embed = discord.Embed(
-            color=0xfa50a0,
-            title=self.game.action_text or discord.Embed.Empty,
-            description=self.game.get_text()
-        )
-        embed.add_field(
-            name='Hold', value=f'`{Pieces(self.game.hold).name}`' if self.game.hold is not None else '`None`'
-        )
-        embed.add_field(
-            name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in self.game.queue.next_pieces)
-        )
-        embed.add_field(
-            name='Score', value=f'**{self.game.score:,}**\n+{self.game.score - self.game.previous_score}'
-        )
+        embed = self.game.get_embed()
         embed.set_footer(text=self.ctx.author, icon_url=self.ctx.author.avatar)
         await self.message.edit(embed=embed, view=self)
 

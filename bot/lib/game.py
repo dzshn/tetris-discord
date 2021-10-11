@@ -4,6 +4,7 @@ import math
 from random import SystemRandom
 from typing import NamedTuple, Optional
 
+import discord
 import numpy as np
 from numpy.typing import NDArray
 
@@ -341,7 +342,7 @@ class Game:
             self.reset()
             self.action_text = 'Block out!'
 
-    def get_text(self) -> str:
+    def get_board_text(self) -> str:
         board = self.board.copy()
         piece = self.current_piece
         ghost = piece.copy()
@@ -353,6 +354,17 @@ class Game:
             board[sx, sy] = piece.type
 
         return '\n'.join(''.join(self.emotes[j] for j in i) for i in board[14:])
+
+    def get_embed(self) -> discord.Embed:
+        embed = discord.Embed(
+            color=0xfa50a0, title=self.action_text or discord.Embed.Empty, description=self.get_board_text()
+        )
+        embed.add_field(
+            name='Hold', value=f'`{Pieces(self.hold).name}`' if self.hold is not None else '`None`'
+        )
+        embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in self.queue.next_pieces))
+        embed.add_field(name='Score', value=f'**{self.score:,}**\n+{self.score - self.previous_score}')
+        return embed
 
     def drop(self, height: int):
         self.current_piece.x += height

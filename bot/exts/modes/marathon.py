@@ -5,7 +5,7 @@ from discord.ext import commands
 from tinydb import TinyDB, where
 from tinydb.table import Table
 
-from bot.lib.game import Game
+from bot.lib.game import Game, Pieces
 from bot.lib.controls import Controls
 
 
@@ -13,6 +13,8 @@ class MarathonGame(Game):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.level = 0
+        self.level_objective = 10
+        self.level_line_clears = 0
         self.until_lock = 20.0
         self.gravity_remainder = 0.0
         self.last_piece_time = time.time()
@@ -26,9 +28,7 @@ class MarathonGame(Game):
     def drag(self, dist):
         super().drag(dist)
         delta = (time.time() - self.last_piece_time)
-        self.gravity_remainder, drop = math.modf(
-            delta / (0.8 - (self.level * 0.007)) + self.gravity_remainder
-        )
+        self.gravity_remainder, drop = math.modf(delta / (0.8 - self.level * 0.007) + self.gravity_remainder)
         self.current_piece.x += int(drop)
         self.until_lock -= delta
         if self.until_lock <= 0:
@@ -36,9 +36,21 @@ class MarathonGame(Game):
             self.lock_piece()
 
     def to_save(self) -> dict:
-        return {
-            'score': self.score,
-        }
+        return {'score': self.score, 'level': self.level}
+
+    def get_embed(self) -> discord.Embed:
+        embed = discord.Embed(
+            color=0xfaa050, title=self.action_text or discord.Embed.Empty, description=self.get_board_text()
+        )
+        embed.add_field(
+            name='Hold', value=f'`{Pieces(self.hold).name}`' if self.hold is not None else '`None`'
+        )
+        embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in self.queue.next_pieces))
+        embed.add_field(name='Score', value=f'**{self.score:,}**\n+{self.score - self.previous_score}')
+        embed.add_field(
+            name=f'Level {self.level + 1}', value=f'{self.level_line_clears}/{self.level_objective} lines'
+        )
+        return embed
 
 
 class Marathon(commands.Cog):
@@ -58,7 +70,7 @@ class Marathon(commands.Cog):
             await ctx.send("There's already a game running!")
             return
 
-        embed = discord.Embed(color=0xfa50a0, title='Loading...').set_image(
+        embed = discord.Embed(color=0xfaa050, title='Loading...').set_image(
             url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'
         )
         msg = await ctx.send(embed=embed)
