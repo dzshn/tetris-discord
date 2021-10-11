@@ -3,7 +3,8 @@ import numpy as np
 from discord.ext import commands
 from tinydb import where
 
-from bot.lib import Game, Pieces
+from bot.lib.game import Game
+from bot.lib.game import Pieces
 from bot.lib.maps import Encoder
 
 

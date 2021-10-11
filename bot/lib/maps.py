@@ -2,8 +2,9 @@ import base64
 from typing import Optional
 
 import numpy as np
-from bot.lib import Piece
 from numpy.typing import NDArray
+
+from bot.lib.game import Piece
 
 
 class Encoder:

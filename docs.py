@@ -1,7 +1,8 @@
 import argparse
 import pathlib
 import webbrowser
-from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
+from http.server import SimpleHTTPRequestHandler
+from http.server import ThreadingHTTPServer
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.RawTextHelpFormatter,

@@ -6,8 +6,8 @@ import traceback
 import discord
 from discord.ext import commands
 from tinydb import TinyDB
-from tinydb.storages import JSONStorage
 from tinydb.middlewares import CachingMiddleware
+from tinydb.storages import JSONStorage
 
 from bot import exts
 

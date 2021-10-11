@@ -1,12 +1,15 @@
-import discord
-import time
 import math
+import time
+
+import discord
 from discord.ext import commands
-from tinydb import TinyDB, where
+from tinydb import TinyDB
+from tinydb import where
 from tinydb.table import Table
 
-from bot.lib.game import Game, Pieces
 from bot.lib.controls import Controls
+from bot.lib.game import Game
+from bot.lib.game import Pieces
 
 
 class MarathonGame(Game):

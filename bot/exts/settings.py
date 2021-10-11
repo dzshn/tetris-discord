@@ -2,7 +2,8 @@ from typing import Any
 
 import discord
 from discord.ext import commands
-from tinydb import TinyDB, where
+from tinydb import TinyDB
+from tinydb import where
 
 from bot.lib.maps import Encoder
 

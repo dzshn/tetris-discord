@@ -8,7 +8,9 @@ import discord
 import numpy as np
 from numpy.typing import NDArray
 
-from bot.lib.consts import SHAPES, SRS_KICKS, SRS_I_KICKS
+from bot.lib.consts import SHAPES
+from bot.lib.consts import SRS_I_KICKS
+from bot.lib.consts import SRS_KICKS
 
 Pieces = enum.Enum('PIECES', 'I L J S Z T O')
 random = SystemRandom()

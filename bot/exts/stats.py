@@ -3,14 +3,16 @@ import gc
 import inspect
 import json
 import pathlib
-import psutil
 import statistics
 import sys
 from typing import Optional
 
 import discord
-from discord.ext import commands, tasks
-from tinydb import TinyDB, where
+import psutil
+from discord.ext import commands
+from discord.ext import tasks
+from tinydb import TinyDB
+from tinydb import where
 
 
 class Stats(commands.Cog):

@@ -1,11 +1,15 @@
 import discord
 import numpy as np
-from discord.ext import commands, tasks
-from tinydb import TinyDB, where
+from discord.ext import commands
+from discord.ext import tasks
+from tinydb import TinyDB
+from tinydb import where
 from tinydb.table import Table
 
-from bot.lib.game import Game, Piece, Queue
 from bot.lib.controls import Controls
+from bot.lib.game import Game
+from bot.lib.game import Piece
+from bot.lib.game import Queue
 from bot.lib.maps import Encoder
 
 

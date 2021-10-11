@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from bot.lib.game import Game, Pieces
+from bot.lib.game import Game
 
 
 class Controls(discord.ui.View):
