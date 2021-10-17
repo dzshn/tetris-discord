@@ -70,7 +70,6 @@ class Stats(commands.Cog):
 
     @tasks.loop(minutes=15)
     async def update_status(self):
-        await self.bot.change_presence(activity=discord.Game('Tetris || https://tetris-dsc.dzshn.xyz'))
         if self.status_msg is None:
             status_msg: dict[str, int] = self.bot.config.get('status_msg')
             if status_msg is not None:
@@ -107,6 +106,7 @@ class Stats(commands.Cog):
     @update_status.before_loop
     async def before_update_status(self):
         await self.bot.wait_until_ready()
+        await self.bot.change_presence(activity=discord.Game('Tetris ─ td.dzshn.xyz'))
 
     @commands.command()
     async def top(self, ctx: commands.Context, page: Optional[int] = 1, mode: Optional[str] = None):

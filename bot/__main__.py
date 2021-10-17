@@ -30,6 +30,8 @@ class TetrisBot(commands.Bot):
             ),
             command_prefix=commands.when_mentioned_or(self.config['prefix']),
             case_insensitive=True,
+            activity=discord.Game('Loading...'),
+            status=discord.Status.dnd
         )
 
         self.load_extension('yade')
