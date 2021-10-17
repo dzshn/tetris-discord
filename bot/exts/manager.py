@@ -70,6 +70,7 @@ class Manager(commands.Cog):
             for view in self.games.values():
                 view.stop()
 
+        self.bot.db.storage.flush()
         await asyncio.sleep(10)
         # FIXME: This forks and doesn't inherit the console (if any)
         subprocess.Popen(psutil.Process().cmdline())
