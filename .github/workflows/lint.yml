@@ -1,9 +1,9 @@
 name: Lint project
 
-on: [pull_request]
+on: [push, pull_request]
 
 jobs:
-    lint:
+    setup:
         runs-on: ubuntu-latest
 
         steps:
@@ -20,14 +20,23 @@ jobs:
               run: |
                   poetry install
 
+    flake8:
+        needs: setup
+        steps:
             - name: Lint with flake8
               run: |
                   poetry run flake8 . --format="::error file=%(path)s,line=%(row)d,col=%(col)d::[%(code)s] %(text)s"
 
-            - name: Lint with yapf
+    black:
+        needs: setup
+        steps:
+            - name: Lint with black
               run: |
-                  poetry run yapf -dr . | awk "/^---/ { print \"::error file=\" \$2 \"::File doesn't have project formatting\" }"
+                  poetry run black --check . 2>&1 | awk "/^would reformat/ { print \"::error file=\" \$3 \"::doesn't have black's formatting\" }"
 
+    isort:
+        needs: setup
+        steps:
             - name: Lint with isort
               run: |
                   poetry run isort . --check --quiet
