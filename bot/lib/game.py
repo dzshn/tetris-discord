@@ -67,7 +67,9 @@ class FrameDelta:
 
 
 class Piece:
-    def __init__(self, board: NDArray[np.int8], t: int, x: int = 10, y: int = 3, r: int = 0):
+    def __init__(
+        self, board: NDArray[np.int8], t: int, x: int = 10, y: int = 3, r: int = 0
+    ):
         self.board = board
         self.type = t
         self.pos = Position(x, y)
@@ -126,7 +128,9 @@ class Piece:
         if Piece(self.board, self.type, self.x, self.y, value).overlaps():
             kick_table = SRS_I_KICKS if self.type == Pieces.I else SRS_KICKS
             for x, y in kick_table[previous][value]:
-                if not Piece(self.board, self.type, self.x + x, self.y + y, value).overlaps():
+                if not Piece(
+                    self.board, self.type, self.x + x, self.y + y, value
+                ).overlaps():
                     self.pos = Position(self.x + x, self.y + y)
                     break
             else:
@@ -240,7 +244,9 @@ class Game:
             x, y = self.current_piece.pos
             max_x, max_y = self.board.shape
             if x + 2 < max_x and y + 2 < max_y:
-                corners = sum(self.board[(x, x + 2, x, x + 2), (y, y, y + 2, y + 2)] != 0)
+                corners = sum(
+                    self.board[(x, x + 2, x, x + 2), (y, y, y + 2, y + 2)] != 0
+                )
 
             elif x + 2 > max_x and y + 2 < max_y:
                 corners = 2
@@ -256,35 +262,52 @@ class Game:
 
             if corners >= 3 and self.current_piece.delta.rotation:
                 tspin = True
+                # ▒▒██▒▒ <- these corners
+                # ██████
                 front_corner_offsets = [
-                    ((x, x), (y, y + 2)),          # ▒▒██▒▒ <- these corners
-                    ((x, x + 2), (y + 2, y + 2)),  # ██████
+                    ((x, x), (y, y + 2)),
+                    ((x, x + 2), (y + 2, y + 2)),
                     ((x + 2, x + 2), (y, y + 2)),
-                    ((x, x + 2), (y, y))
-                ]  # yapf: disable
+                    ((x, x + 2), (y, y)),
+                ]
 
                 # Only is a mini if a front corner isn't present and it wasn't a X -> +2 kick
-                mini_spin = not np.all(
-                    self.board[front_corner_offsets[self.current_piece.rot]] != 0
-                ) and self.current_piece.delta.x < 2
+                mini_spin = (
+                    not np.all(
+                        self.board[front_corner_offsets[self.current_piece.rot]] != 0
+                    )
+                    and self.current_piece.delta.x < 2
+                )
 
         line_clears = 0
         for row, clear in enumerate(self.board.all(1)):
             if clear:
                 self.board[row] = 0
                 self.board = np.concatenate(
-                    (np.roll(self.board[:row + 1], shift=1, axis=0), self.board[row + 1:])
+                    (
+                        np.roll(self.board[: row + 1], shift=1, axis=0),
+                        self.board[row + 1 :],
+                    )
                 )
                 line_clears += 1
 
         if tspin:
             if mini_spin:
-                self.action_text = ['Mini T-Spin', 'Mini T-Spin Single', 'Mini T-Spin Double'][line_clears]
+                self.action_text = [
+                    'Mini T-Spin',
+                    'Mini T-Spin Single',
+                    'Mini T-Spin Double',
+                ][line_clears]
                 self.score += [100, 200, 400][line_clears]
                 if self.b2b > 1:
                     self.score += [0, 100, 200][line_clears]
             else:
-                self.action_text = ['T-Spin', 'T-Spin Single', 'T-Spin Double', 'T-Spin Triple'][line_clears]
+                self.action_text = [
+                    'T-Spin',
+                    'T-Spin Single',
+                    'T-Spin Double',
+                    'T-Spin Triple',
+                ][line_clears]
                 self.score += [400, 800, 1200, 1600][line_clears]
                 if self.b2b > 1:
                     self.score += [0, 400, 600, 800][line_clears]
@@ -298,7 +321,9 @@ class Game:
 
         else:
             self.score += [0, 100, 300, 500, 800][line_clears]
-            self.action_text = [None, 'Single', 'Double', 'Triple', 'Tetris'][line_clears]
+            self.action_text = [None, 'Single', 'Double', 'Triple', 'Tetris'][
+                line_clears
+            ]
             if line_clears == 4:
                 self.b2b += 1
                 self.combo += 1
@@ -329,7 +354,11 @@ class Game:
 
         if self.action_text:
             self.action_text += '!' * (
-                line_clears // 2 + (self.combo > 1) + (self.b2b > 1) + tspin + (not self.board.any())
+                line_clears // 2
+                + (self.combo > 1)
+                + (self.b2b > 1)
+                + tspin
+                + (not self.board.any())
             )
 
         for sx, sy in self.current_piece.shape + self.current_piece.pos:
@@ -359,13 +388,22 @@ class Game:
 
     def get_embed(self) -> discord.Embed:
         embed = discord.Embed(
-            color=0xfa50a0, title=self.action_text or discord.Embed.Empty, description=self.get_board_text()
+            color=0xFA50A0,
+            title=self.action_text or discord.Embed.Empty,
+            description=self.get_board_text(),
         )
         embed.add_field(
-            name='Hold', value=f'`{Pieces(self.hold).name}`' if self.hold is not None else '`None`'
+            name='Hold',
+            value=f'`{Pieces(self.hold).name}`' if self.hold is not None else '`None`',
         )
-        embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in self.queue.next_pieces))
-        embed.add_field(name='Score', value=f'**{self.score:,}**\n+{self.score - self.previous_score}')
+        embed.add_field(
+            name='Queue',
+            value=', '.join(f'`{Pieces(i).name}`' for i in self.queue.next_pieces),
+        )
+        embed.add_field(
+            name='Score',
+            value=f'**{self.score:,}**\n+{self.score - self.previous_score}',
+        )
         return embed
 
     def drop(self, height: int):
@@ -387,7 +425,9 @@ class Game:
             self.current_piece = Piece(self.board, self.queue.pop())
 
         else:
-            self.hold, self.current_piece = self.current_piece.type, Piece(self.board, self.hold)
+            self.hold, self.current_piece = self.current_piece.type, Piece(
+                self.board, self.hold
+            )
 
         self.hold_lock = True
 

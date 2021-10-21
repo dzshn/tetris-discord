@@ -7,10 +7,11 @@ from http.server import ThreadingHTTPServer
 parser = argparse.ArgumentParser(
     formatter_class=argparse.RawTextHelpFormatter,
     description=(
-        'Properly serves docs/ for testing, letting vue-router handle pages.\n\n'
-        'See https://next.router.vuejs.org/guide/essentials/history-mode.html#html5-mode for more info'
+        'Properly serves docs/ for testing, letting vue-router handle pages.\n\nSee'
+        ' https://next.router.vuejs.org/guide/essentials/history-mode.html#html5-mode'
+        ' for more info'
     ),
-    usage='python docs.py [--port int]'
+    usage='python docs.py [--port int]',
 )
 parser.add_argument('--port', default=8080, type=int, metavar='int')
 

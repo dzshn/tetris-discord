@@ -51,14 +51,19 @@ class Maps(commands.Cog):
             for x, y in piece.shape + piece.pos:
                 board[x, y] = piece.type
 
-        user_skin = self.bot.db.table('settings').get(where('user_id') == ctx.author.id).get('skin', 0)
+        user_skin = (
+            self.bot.db.table('settings')
+            .get(where('user_id') == ctx.author.id)
+            .get('skin', 0)
+        )
 
         await ctx.send(
             embed=discord.Embed(
-                color=0xfa50a0,
+                color=0xFA50A0,
                 description='\n'.join(
-                    ''.join(self.bot.config['skins'][user_skin]['pieces'][j] for j in i) for i in board[-16:]
-                )
+                    ''.join(self.bot.config['skins'][user_skin]['pieces'][j] for j in i)
+                    for i in board[-16:]
+                ),
             )
         )
 

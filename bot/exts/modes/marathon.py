@@ -30,8 +30,10 @@ class MarathonGame(Game):
 
     def drag(self, dist):
         super().drag(dist)
-        delta = (time.time() - self.last_piece_time)
-        self.gravity_remainder, drop = math.modf(delta / (0.8 - self.level * 0.007) + self.gravity_remainder)
+        delta = time.time() - self.last_piece_time
+        self.gravity_remainder, drop = math.modf(
+            delta / (0.8 - self.level * 0.007) + self.gravity_remainder
+        )
         self.current_piece.x += int(drop)
         self.until_lock -= delta
         if self.until_lock <= 0:
@@ -43,15 +45,25 @@ class MarathonGame(Game):
 
     def get_embed(self) -> discord.Embed:
         embed = discord.Embed(
-            color=0xfaa050, title=self.action_text or discord.Embed.Empty, description=self.get_board_text()
+            color=0xFAA050,
+            title=self.action_text or discord.Embed.Empty,
+            description=self.get_board_text(),
         )
         embed.add_field(
-            name='Hold', value=f'`{Pieces(self.hold).name}`' if self.hold is not None else '`None`'
+            name='Hold',
+            value=f'`{Pieces(self.hold).name}`' if self.hold is not None else '`None`',
         )
-        embed.add_field(name='Queue', value=', '.join(f'`{Pieces(i).name}`' for i in self.queue.next_pieces))
-        embed.add_field(name='Score', value=f'**{self.score:,}**\n+{self.score - self.previous_score}')
         embed.add_field(
-            name=f'Level {self.level + 1}', value=f'{self.level_line_clears}/{self.level_objective} lines'
+            name='Queue',
+            value=', '.join(f'`{Pieces(i).name}`' for i in self.queue.next_pieces),
+        )
+        embed.add_field(
+            name='Score',
+            value=f'**{self.score:,}**\n+{self.score - self.previous_score}',
+        )
+        embed.add_field(
+            name=f'Level {self.level + 1}',
+            value=f'{self.level_line_clears}/{self.level_objective} lines',
         )
         return embed
 
@@ -73,11 +85,13 @@ class Marathon(commands.Cog):
             await ctx.send("There's already a game running!")
             return
 
-        embed = discord.Embed(color=0xfaa050, title='Loading...').set_image(
-            url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'
+        embed = discord.Embed(color=0xFAA050, title='Loading...').set_image(
+            url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'  # noqa: E501
         )
         msg = await ctx.send(embed=embed)
-        user_settings: dict[str, int] = self.db.table('settings').get(where('user_id') == ctx.author.id) or {}
+        user_settings: dict[str, int] = (
+            self.db.table('settings').get(where('user_id') == ctx.author.id) or {}
+        )
         user_controls = Controls.from_config(user_settings)
 
         game = MarathonGame(self.bot.config, user_settings)
@@ -86,7 +100,10 @@ class Marathon(commands.Cog):
         await view.update_message()
         await view.wait()
 
-        self.db_table.upsert(game.to_save() | {'user_id': ctx.author.id}, where('user_id') == ctx.author.id)
+        self.db_table.upsert(
+            game.to_save() | {'user_id': ctx.author.id},
+            where('user_id') == ctx.author.id,
+        )
 
         del games[ctx.author.id]
 

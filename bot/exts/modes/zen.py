@@ -17,7 +17,9 @@ class ZenGame(Game):
     def __init__(self, save, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.queue = Queue(initial_queue=save.get('queue', []), initial_bag=save.get('bag', []))
+        self.queue = Queue(
+            initial_queue=save.get('queue', []), initial_bag=save.get('bag', [])
+        )
         if save.get('board') is not None:
             self.board, self.current_piece = Encoder.decode(save['board'])
         else:
@@ -37,7 +39,7 @@ class ZenGame(Game):
             'queue': self.queue.next_pieces,
             'bag': self.queue.current_bag,
             'hold': self.hold,
-            'hold_lock': self.hold_lock
+            'hold_lock': self.hold_lock,
         }
 
 
@@ -56,7 +58,7 @@ class Zen(commands.Cog):
 
             self.db_table.upsert(
                 view.game.to_save() | {'user_id': view.ctx.author.id},
-                where('user_id') == author
+                where('user_id') == author,
             )
 
     @autosave.before_loop
@@ -82,22 +84,29 @@ class Zen(commands.Cog):
             await ctx.send("There's already a game running!")
             return
 
-        embed = discord.Embed(color=0xfa50a0, title='Loading...').set_image(
-            url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'
+        embed = discord.Embed(color=0xFA50A0, title='Loading...').set_image(
+            url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'  # noqa: E501
         )
         msg = await ctx.send(embed=embed)
-        user_settings: dict[str, int] = self.db.table('settings').get(where('user_id') == ctx.author.id) or {}
+        user_settings: dict[str, int] = (
+            self.db.table('settings').get(where('user_id') == ctx.author.id) or {}
+        )
         user_controls = Controls.from_config(user_settings)
 
         game = ZenGame(
-            self.db_table.get(where('user_id') == ctx.author.id) or {}, self.bot.config, user_settings
+            self.db_table.get(where('user_id') == ctx.author.id) or {},
+            self.bot.config,
+            user_settings,
         )
         view = user_controls(game, ctx, msg)
         games[ctx.author.id] = view
         await view.update_message()
         await view.wait()
 
-        self.db_table.upsert(game.to_save() | {'user_id': ctx.author.id}, where('user_id') == ctx.author.id)
+        self.db_table.upsert(
+            game.to_save() | {'user_id': ctx.author.id},
+            where('user_id') == ctx.author.id,
+        )
 
         del games[ctx.author.id]
 
@@ -106,7 +115,9 @@ class Zen(commands.Cog):
         """Restarts current zen game, all score is kept"""
         games: dict[int, Controls] = self.bot.get_cog('Manager').games
 
-        if ctx.author.id not in games or not isinstance(games[ctx.author.id].game, ZenGame):
+        if ctx.author.id not in games or not isinstance(
+            games[ctx.author.id].game, ZenGame
+        ):
             await ctx.send("There isn't a zen game running!")
             return
 

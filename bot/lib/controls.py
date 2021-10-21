@@ -40,18 +40,25 @@ class AdvancedControls(Controls):
         [Rotate  <-] [Rotate ->] [Hard drop] [Swap   ] [Rotate  x2]
         [Charge <<-] [Move   <-] [Soft drop] [Move ->] [Charge ->>]
     """
+
     @discord.ui.button(label='↺', style=discord.ButtonStyle.primary)
-    async def rotate_ccw(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def rotate_ccw(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.rotate(-1)
         await self.update_message()
 
     @discord.ui.button(label='↻', style=discord.ButtonStyle.primary)
-    async def rotate_cw(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def rotate_cw(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.rotate(+1)
         await self.update_message()
 
     @discord.ui.button(label='⇊', style=discord.ButtonStyle.primary)
-    async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def hard_drop(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.hard_drop()
         await self.update_message()
 
@@ -61,32 +68,44 @@ class AdvancedControls(Controls):
         await self.update_message()
 
     @discord.ui.button(label='🗘', style=discord.ButtonStyle.primary)
-    async def rotate_cw2(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def rotate_cw2(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.rotate(2)
         await self.update_message()
 
     @discord.ui.button(label='↞', style=discord.ButtonStyle.primary)
-    async def charge_left(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def charge_left(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.drag(-10)
         await self.update_message()
 
     @discord.ui.button(label='🡸', style=discord.ButtonStyle.primary)
-    async def move_left(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def move_left(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.drag(-1)
         await self.update_message()
 
     @discord.ui.button(label='🡻', style=discord.ButtonStyle.primary)
-    async def soft_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def soft_drop(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.soft_drop()
         await self.update_message()
 
     @discord.ui.button(label='🡺', style=discord.ButtonStyle.primary)
-    async def move_right(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def move_right(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.drag(+1)
         await self.update_message()
 
     @discord.ui.button(label='↠', style=discord.ButtonStyle.primary)
-    async def charge_right(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def charge_right(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.drag(+10)
         await self.update_message()
 
@@ -98,12 +117,15 @@ class BasicControls(Controls):
         [       ] [Hard drop] [       ] [Swap     ] [Rotate x2]
         [Move <-] [Soft drop] [Move ->] [Rotate <-] [Rotate ->]
     """
+
     @discord.ui.button(label='\u200c', disabled=True, row=0)
     async def _0(self, *_):
         pass
 
     @discord.ui.button(label='⇊', style=discord.ButtonStyle.primary, row=0)
-    async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def hard_drop(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.hard_drop()
         await self.update_message()
 
@@ -117,32 +139,44 @@ class BasicControls(Controls):
         await self.update_message()
 
     @discord.ui.button(label='🗘', style=discord.ButtonStyle.primary, row=0)
-    async def rotate_cw2(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def rotate_cw2(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.rotate(2)
         await self.update_message()
 
     @discord.ui.button(label='🡸', style=discord.ButtonStyle.primary, row=1)
-    async def move_left(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def move_left(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.drag(-1)
         await self.update_message()
 
     @discord.ui.button(label='🡻', style=discord.ButtonStyle.primary, row=1)
-    async def soft_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def soft_drop(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.soft_drop()
         await self.update_message()
 
     @discord.ui.button(label='🡺', style=discord.ButtonStyle.primary, row=1)
-    async def move_right(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def move_right(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.drag(+1)
         await self.update_message()
 
     @discord.ui.button(label='↺', style=discord.ButtonStyle.primary, row=1)
-    async def rotate_ccw(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def rotate_ccw(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.rotate(-1)
         await self.update_message()
 
     @discord.ui.button(label='↻', style=discord.ButtonStyle.primary, row=1)
-    async def rotate_cw(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def rotate_cw(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.rotate(+1)
         await self.update_message()
 
@@ -154,38 +188,53 @@ class CompactControls(Controls):
         [Rotate <-] [Hard drop] [Rotate ->] [Rotate x2]
         [Move   <-] [Soft drop] [Move   ->] [Swap     ]
     """
+
     @discord.ui.button(label='↺', style=discord.ButtonStyle.primary, row=0)
-    async def rotate_ccw(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def rotate_ccw(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.rotate(-1)
         await self.update_message()
 
     @discord.ui.button(label='⇊', style=discord.ButtonStyle.primary, row=0)
-    async def hard_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def hard_drop(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.hard_drop()
         await self.update_message()
 
     @discord.ui.button(label='↻', style=discord.ButtonStyle.primary, row=0)
-    async def rotate_cw(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def rotate_cw(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.rotate(+1)
         await self.update_message()
 
     @discord.ui.button(label='🗘', style=discord.ButtonStyle.primary, row=0)
-    async def rotate_cw2(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def rotate_cw2(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.rotate(2)
         await self.update_message()
 
     @discord.ui.button(label='🡸', style=discord.ButtonStyle.primary, row=1)
-    async def move_left(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def move_left(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.drag(-1)
         await self.update_message()
 
     @discord.ui.button(label='🡻', style=discord.ButtonStyle.primary, row=1)
-    async def soft_drop(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def soft_drop(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.soft_drop()
         await self.update_message()
 
     @discord.ui.button(label='🡺', style=discord.ButtonStyle.primary, row=1)
-    async def move_right(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def move_right(
+        self, button: discord.ui.Button, interaction: discord.Interaction
+    ):
         self.game.drag(+1)
         await self.update_message()
 

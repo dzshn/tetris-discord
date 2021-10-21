@@ -23,6 +23,7 @@ class Encoder:
 
     this format is max ~200 characters for up to 30 rows
     """
+
     @staticmethod
     def encode(board: NDArray[int], piece: Optional[Piece] = None) -> str:
         pairs = []
@@ -65,7 +66,9 @@ class Encoder:
 
     @staticmethod
     def decode(encoded: str) -> (NDArray[np.int8], Optional[Piece]):
-        board, piece = encoded.split('@') if encoded[-1] != '@' else (encoded.rstrip('@'), None)
+        board, piece = (
+            encoded.split('@') if encoded[-1] != '@' else (encoded.rstrip('@'), None)
+        )
         if '~' in board:
             board, garbage = board.split('~')
         else:
@@ -80,7 +83,9 @@ class Encoder:
 
         board = np.array(flat_board, dtype=np.int8).reshape((-1, 10))
         if board.shape[0] < 30:
-            board = np.concatenate((np.zeros((30 - board.shape[0], 10), dtype=np.int8), board))
+            board = np.concatenate(
+                (np.zeros((30 - board.shape[0], 10), dtype=np.int8), board)
+            )
 
         if piece is not None:
             piece = Piece(board, *map(int, piece.split('+')))

@@ -34,11 +34,13 @@ class Stats(commands.Cog):
         #      we check if this is being called from `super().close()`
         # sorry!!!  ...i don't like it either
         frames = inspect.getouterframes(sys._getframe())
-        if self.status_msg is not None and any('close' in i.frame.f_code.co_names for i in frames):
+        if self.status_msg is not None and any(
+            'close' in i.frame.f_code.co_names for i in frames
+        ):
             task = self.bot.loop.create_task(
                 self.status_msg.edit(
                     embed=discord.Embed(
-                        color=0xfa5050,
+                        color=0xFA5050,
                         title='Current status',
                         description='`Status :: Offline!`'
                         # TODO: show shutdown time?
@@ -52,15 +54,23 @@ class Stats(commands.Cog):
     async def update_leaderboard(self):
         for table in ['zen']:
             top = sorted(
-                ({'user_id': i['user_id'], 'score': i['score']} for i in self.db.table(table)),
-                key=lambda x: x['score'], reverse=True
-            )  # yapf: disable
+                (
+                    {'user_id': i['user_id'], 'score': i['score']}
+                    for i in self.db.table(table)
+                ),
+                key=lambda x: x['score'],
+                reverse=True,
+            )
 
             if top:
                 self.db.table('leaderboard').upsert(
-                    {'table': table, 'top': top, 'median': int(statistics.median(i['score'] for i in top))},
-                    where('table') == table
-                )  # yapf: disable
+                    {
+                        'table': table,
+                        'top': top,
+                        'median': int(statistics.median(i['score'] for i in top)),
+                    },
+                    where('table') == table,
+                )
             else:
                 self.db.table('leaderboard').remove(where('table') == table)
 
@@ -74,8 +84,9 @@ class Stats(commands.Cog):
             status_msg: dict[str, int] = self.bot.config.get('status_msg')
             if status_msg is not None:
                 try:
-                    self.status_msg = await self.bot.get_channel(status_msg['ch']) \
-                                                    .fetch_message(status_msg['msg'])
+                    self.status_msg = await self.bot.get_channel(
+                        status_msg['ch']
+                    ).fetch_message(status_msg['msg'])
                 except discord.NotFound:
                     config = json.load(open('config.json'))
                     del config['status_msg']
@@ -88,19 +99,25 @@ class Stats(commands.Cog):
         with proc.oneshot():
             await self.status_msg.edit(
                 embed=discord.Embed(
-                    color=0xfa50a0,
+                    color=0xFA50A0,
                     title='Current status',
-                    description=f'`Status :: Online!`\nStarted <t:{int(proc.create_time())}:R>',
-                    timestamp=datetime.datetime.now()
-                ).add_field(
+                    description=(
+                        f'`Status :: Online!`\nStarted <t:{int(proc.create_time())}:R>'
+                    ),
+                    timestamp=datetime.datetime.now(),
+                )
+                .add_field(
                     name='Data/usage',
                     value=(
-                        f'`db.json` has `{pathlib.Path("db.json").stat().st_size / 1024:.2f}kb` of data\n'
-                        f'`{proc.memory_info().rss / 1024 / 1024:.2f} mb` of '
-                        f'`{psutil.virtual_memory().total / 1024 / 1024:.2f} mb` RAM has been allocated\n'
-                        f'`{proc.cpu_percent():.2f}%` CPU used in `{proc.num_threads()}` threads'
-                    )
-                ).set_footer(text='Updates every 15 minutes')
+                        '`db.json` has'
+                        f' `{pathlib.Path("db.json").stat().st_size / 1024:.2f}kb` of'
+                        f' data\n`{proc.memory_info().rss / 1024 / 1024:.2f} mb` of'
+                        f' `{psutil.virtual_memory().total / 1024 / 1024:.2f} mb` RAM'
+                        f' has been allocated\n`{proc.cpu_percent():.2f}%` CPU used in'
+                        f' `{proc.num_threads()}` threads'
+                    ),
+                )
+                .set_footer(text='Updates every 15 minutes')
             )
 
     @update_status.before_loop
@@ -109,12 +126,14 @@ class Stats(commands.Cog):
         await self.bot.change_presence(activity=discord.Game('Tetris ─ td.dzshn.xyz'))
 
     @commands.command()
-    async def top(self, ctx: commands.Context, page: Optional[int] = 1, mode: Optional[str] = None):
+    async def top(
+        self, ctx: commands.Context, page: Optional[int] = 1, mode: Optional[str] = None
+    ):
         if page < 1:
             raise commands.BadArgument(':eye:')
 
         if mode is None:
-            embed = discord.Embed(color=0xfa50a0, title='Top scores on all modes')
+            embed = discord.Embed(color=0xFA50A0, title='Top scores on all modes')
 
             for i in self.db.table('leaderboard'):
                 embed.add_field(
@@ -122,7 +141,7 @@ class Stats(commands.Cog):
                     value='\n'.join(
                         '**#{}**: <@{user_id}>: **{score:,}**'.format(j + 1, **k)
                         for j, k in enumerate(i['top'][:5])
-                    )
+                    ),
                 )
 
             await ctx.send(embed=embed)
@@ -134,27 +153,36 @@ class Stats(commands.Cog):
                 top = table['top']
                 await ctx.send(
                     embed=discord.Embed(
-                        color=0xfa50a0,
+                        color=0xFA50A0,
                         title=f'Top scores on {table_name}',
-                        description=f'*Median score: **{table["median"]:,}***\n\n' + '\n'.join(
-                            f'**#{i + 1 + (page - 1) * 15}**: <@{j["user_id"]}>: **{j["score"]:,}**'
-                            for i, j in enumerate(top[(page - 1) * 15:page * 15])
+                        description=f'*Median score: **{table["median"]:,}***\n\n'
+                        + '\n'.join(
+                            f'**#{i + 1 + (page - 1) * 15}**: <@{j["user_id"]}>:'
+                            f' **{j["score"]:,}**'
+                            for i, j in enumerate(top[(page - 1) * 15 : page * 15])
+                        ),
+                    ).set_footer(
+                        text=(
+                            f'Page {page} of {len(top) // 15 + 1} · top'
+                            f' {page} {table_name}'
                         )
-                    ).set_footer(text=f'Page {page} of {len(top) // 15 + 1} · top {page} {table_name}')
+                    )
                 )
             else:
                 await ctx.send(f"Score for {table_name} doesn't exist!")
 
     @commands.command(hidden=True)
     @commands.is_owner()
-    async def setpersiststs(self, ctx: commands.Context, channel: discord.TextChannel = None):
+    async def setpersiststs(
+        self, ctx: commands.Context, channel: discord.TextChannel = None
+    ):
         if channel is None:
             channel = ctx.channel
             await ctx.message.delete()
 
         msg = await channel.send(
-            embed=discord.Embed(color=0xfa50a0, title='...!').set_image(
-                url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'
+            embed=discord.Embed(color=0xFA50A0, title='...!').set_image(
+                url='https://media.discordapp.net/attachments/825871731155664907/884158159537704980/dtc.gif'  # noqa: E501
             )
         )
         config = json.load(open('config.json'))
