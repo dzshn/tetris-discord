@@ -84,7 +84,7 @@ class Piece:
         t: PieceType,
         x: Optional[int] = None,
         y: Optional[int] = None,
-        r: int = 0,
+        rot: int = 0
     ):
         self.board = board
         self.type = t
@@ -95,7 +95,7 @@ class Piece:
             assert x is not None and y is not None, 'x, y should both be specified'
             self.pos = Position(x, y)
 
-        self._rot = r
+        self._rot = rot
         self.frame = Frame(pos=self.pos, rot=self.rot)
         self.delta = None
 
@@ -171,7 +171,7 @@ class Piece:
             't': self.type,
             'x': self.x,
             'y': self.y,
-            'r': self.rot,
+            'rot': self.rot,
         } | kwargs
         return Piece(**kwargs)
 
