@@ -84,7 +84,7 @@ class Piece:
         t: PieceType,
         x: Optional[int] = None,
         y: Optional[int] = None,
-        rot: int = 0
+        rot: int = 0,
     ):
         self.board = board
         self.type = t
