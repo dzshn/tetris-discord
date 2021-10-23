@@ -29,7 +29,7 @@ jobs:
                   poetry run black --check . 2>&1 | awk "/^would reformat/ { print \"::error file=\" \$3 \"::doesn't have black's formatting\" }"
                   # Github actions doesn't seem to respect $pipestatus, so forcefully fail
                   # ¯\_(ツ)_/¯
-                  [[ $PIPESTATUS != "0 0" ]] && exit 1
+                  exit ${PIPESTATUS[0]}
 
             - name: Lint with isort
               run: |
