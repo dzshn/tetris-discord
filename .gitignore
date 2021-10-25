@@ -1,5 +1,6 @@
 TOKEN
 config.json
+config.yaml
 __pycache__/
 .vscode/
 db.json
