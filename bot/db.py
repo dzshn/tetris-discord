@@ -1,3 +1,5 @@
+from typing import Union
+
 import aioredis
 import fakeredis.aioredis
 import redis
@@ -9,11 +11,13 @@ db_ids = {
 }
 
 
-def get_session(name: str) -> aioredis.Redis:
+def get_session(name: Union[str, int] = 0) -> aioredis.Redis:
+    db_id = db_ids[name] if isinstance(name, str) else name
+
     try:
         redis.from_url('redis://localhost').ping()
 
     except redis.ConnectionError:
-        return fakeredis.aioredis.FakeRedis(db=db_ids[name])
+        return fakeredis.aioredis.FakeRedis(db=db_id)
 
-    return aioredis.from_url('redis://localhost', db=db_ids[name])
+    return aioredis.from_url('redis://localhost', db=db_id)

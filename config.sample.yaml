@@ -7,3 +7,5 @@ skins:
       # Due to discord's limits with embeds, their names should have at most two characters
       # or the text size exceeds 4096 chars
       pieces: ['⬛', '🟦', '🟧', '🟦', '🟩', '🟥', '🟪', '🟨', '🔳', '◽']
+
+status-channel: null
