@@ -345,14 +345,6 @@ optional = false
 python-versions = "*"
 
 [[package]]
-name = "tinydb"
-version = "4.5.2"
-description = "TinyDB is a tiny, document oriented database optimized for your happiness :)"
-category = "main"
-optional = false
-python-versions = ">=3.5,<4.0"
-
-[[package]]
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
@@ -409,7 +401,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "f98659d5df68cf1ad5c16d992b73c452d81e7859f66b58fb1b31ae9e83e4c80e"
+content-hash = "9320187f091c2fea26526c7af8a42f71f35f8fdd7989e63019eb7def116bffeb"
 
 [metadata.files]
 aiohttp = [
@@ -770,10 +762,6 @@ six = [
 sortedcontainers = [
     {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
     {file = "sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88"},
-]
-tinydb = [
-    {file = "tinydb-4.5.2-py3-none-any.whl", hash = "sha256:3c5e5c72c98db07e707be4e25f9e135a8a14b96938e4745b1b7187fec523ff58"},
-    {file = "tinydb-4.5.2.tar.gz", hash = "sha256:7d18b2d0217827c188f177cd23df60e5cd5316a717e836a8e21c8c2488262cf5"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
