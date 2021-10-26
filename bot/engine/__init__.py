@@ -8,9 +8,9 @@ from typing import NamedTuple, Optional, Union
 import numpy as np
 from numpy.typing import NDArray
 
-from bot.lib.consts import SHAPES
-from bot.lib.consts import SRS_I_KICKS
-from bot.lib.consts import SRS_KICKS
+from bot.engine.consts import SHAPES
+from bot.engine.consts import SRS_I_KICKS
+from bot.engine.consts import SRS_KICKS
 
 PieceType = enum.IntEnum('PieceType', 'I L J S Z T O')
 
