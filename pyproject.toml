@@ -11,7 +11,6 @@ python = "^3.9,<3.11"
 numpy = "^1.21.2"
 psutil = "^5.8.0"
 yade = {git = "https://github.com/dzshn/yade", rev = "main"}
-black = "^21.9b0"
 aioredis = "^2.0.0"
 fakeredis = "^1.6.1"
 redis = "^3.5.3"
@@ -19,10 +18,9 @@ hiredis = "^2.0.0"
 PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
-toml = "^0.10.2"
 flake8 = "^4.0.1"
-rope = "^0.20.1"
 isort = "^5.9.3"
+black = "^21.9b0"
 
 [tool.black]
 skip-string-normalization = true
