@@ -9,24 +9,21 @@ license = "MIT"
 python = "^3.9,<3.11"
 "discord.py" = {git = "https://github.com/Rapptz/discord.py"}
 numpy = "^1.21.2"
-tinydb = "^4.5.2"
 psutil = "^5.8.0"
 yade = {git = "https://github.com/dzshn/yade", rev = "main"}
+aioredis = "^2.0.0"
+fakeredis = "^1.6.1"
+redis = "^3.5.3"
+hiredis = "^2.0.0"
+PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
-yapf = "^0.31.0"
-toml = "^0.10.2"
 flake8 = "^4.0.1"
-rope = "^0.20.1"
 isort = "^5.9.3"
+black = "^21.9b0"
 
-[tool.yapf]
-based_on_style = "google"
-column_limit = 110
-blank_line_before_nested_class_or_def = false
-dedent_closing_brackets = true
-split_before_dot = true
-coalesce_brackets = true
+[tool.black]
+skip-string-normalization = true
 
 [tool.isort]
 profile = "google"

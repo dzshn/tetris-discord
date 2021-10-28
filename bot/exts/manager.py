@@ -20,10 +20,14 @@ class Manager(commands.Cog):
 
     @commands.command(hidden=True)
     @commands.is_owner()
-    async def doupdate(self, ctx: commands.Context, pull_option: Literal[PULL_OPTS] = 'pull'):
+    async def doupdate(
+        self, ctx: commands.Context, pull_option: Literal[PULL_OPTS] = 'pull'
+    ):
         if pull_option != 'nopull':
             git_proc = await asyncio.subprocess.create_subprocess_shell(
-                'git pull --dry-run --no-ff', stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                'git pull --dry-run --no-ff',
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
             git_stdout, git_stderr = await git_proc.communicate()
             if git_stdout.decode() or git_stderr.decode():
@@ -38,8 +42,9 @@ class Manager(commands.Cog):
                     reply = (
                         await self.bot.wait_for(
                             'message',
-                            check=lambda m: m.author == ctx.author and m.channel == ctx.channel,
-                            timeout=60
+                            check=lambda m: m.author == ctx.author
+                            and m.channel == ctx.channel,
+                            timeout=60,
                         )
                     ).content.lower()
                     do_pull = reply in ('y', 'yes')
@@ -48,13 +53,16 @@ class Manager(commands.Cog):
 
                 if do_pull:
                     pull_proc = await asyncio.subprocess.create_subprocess_shell(
-                        'git pull --no-ff', stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                        'git pull --no-ff',
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.PIPE,
                     )
                     pull_stdout, pull_stderr = await pull_proc.communicate()
                     if pull_proc.returncode != 0:
                         raise RuntimeError(
-                            f'`git pull --no-ff` returned non-zero code {pull_proc.returncode}; '
-                            f'stdout={pull_stdout!r} stderr={pull_stderr!r}'
+                            '`git pull --no-ff` returned non-zero code'
+                            f' {pull_proc.returncode};'
+                            f' stdout={pull_stdout!r} stderr={pull_stderr!r}'
                         )
 
                     await ctx.send('Pulled changes')
@@ -63,7 +71,9 @@ class Manager(commands.Cog):
             raise OnMaintenance('Currently reloading, sorry!')
 
         self.bot.add_check(lock)
-        await self.bot.change_presence(status=discord.Status.dnd, activity=discord.Game('Reloading!'))
+        await self.bot.change_presence(
+            status=discord.Status.dnd, activity=discord.Game('Reloading!')
+        )
 
         if self.games:
             await asyncio.sleep(120)

@@ -1,5 +1,17 @@
+# Bot stuff
 TOKEN
-config.json
+db.rdb
+config.yaml
+
+# cached stuff
 __pycache__/
+*.pyc
+
+# editor bloat
 .vscode/
-db.json
+.idea/
+
+# not even from here but ignore anyway
+Pipfile.lock
+.python-version
+.ipynb_checkpoints
