@@ -1,7 +1,3 @@
-from types import CoroutineType
-from types import FunctionType
-from typing import Optional
-
 import discord
 
 from bot import config
@@ -11,29 +7,32 @@ from bot.engine import BaseGame
 class Controls(discord.ui.View):
     def __init__(self, game, **kwargs):
         self.game = game
-        self._callback: Optional[CoroutineType] = None
-
         kwargs.pop('timeout', None)
         super().__init__(**kwargs, timeout=600)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        return interaction.user == self
+        # return interaction.user == self
+        return True
 
     async def on_error(self, error: Exception, *_):
         raise error  # Let the error handler take care of it
 
-    def button(self, *args, **kwargs):
+    def button(self, **kwargs):
         def wrapper(func):
-            button = discord.ui.Button(*args, **kwargs)
+            button = discord.ui.Button(**kwargs)
 
             async def cb_wrapper(*_):
                 func()
+                await self.callback(*_)
 
             button.callback = cb_wrapper
             self.add_item(button)
             return func
 
         return wrapper
+
+    async def callback(self, interaction: discord.Interaction):
+        pass
 
 
 class DefaultControls(Controls):

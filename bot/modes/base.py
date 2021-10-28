@@ -1,6 +1,7 @@
 import abc
 import functools
 
+import discord
 from discord.ext import commands
 
 from bot.db import get_session
@@ -32,6 +33,26 @@ class BaseMode(metaclass=ABCMeta):
     async def command(self, ctx: commands.Context):
         pass
 
+    @abc.abstractmethod
+    async def update_message(
+        self, game: BaseGame, message: discord.Message, view: discord.ui.View
+    ):
+        pass
+
     @functools.cached_property
     def db(self):
         return get_session(self.name)
+
+    def get_callback(
+        self, game: BaseGame, message: discord.Message, view: discord.ui.View
+    ):
+        async def callback(*_):
+            return await self.update_message(game, message, view)
+
+        return callback
+
+    def get_check(self, ctx: commands.Context):
+        async def check(interaction: discord.Interaction):
+            return interaction.user == ctx.author
+
+        return check

@@ -16,19 +16,19 @@ class ZenMode(base.BaseMode, name='zen', game_cls=ZenGame):
         game = ZenGame()
         view = controls.DefaultControls(game)
         message = await ctx.send(content='\u200c', view=view)
-
-        async def callback(interaction: discord.Interaction):
-            await self.update_message(game, message)
-
-        view.callback = callback
-        await self.update_message(game, message)
+        view.callback = self.get_callback(game, message, view)
+        view.interaction_check = self.get_check(ctx)
+        await self.update_message(game, message, view)
         await view.wait()
 
-    async def update_message(self, game: ZenGame, message: discord.Message):
+    async def update_message(
+        self, game: ZenGame, message: discord.Message, view: discord.ui.View
+    ):
         await message.edit(
             content=None,
             embed=discord.Embed(
                 color=0xFA50A0,
                 description=game.render(tiles=config['skins'][0]['pieces'], lines=16),
             ),
+            view=view,
         )
