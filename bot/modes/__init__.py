@@ -1,9 +1,7 @@
-# from bot.modes.zen import ZenMode
 # from bot.modes.marathon import MarathonMode
-#
-# MODES = [
-#     ZenMode,
-#     MarathonMode,
-# ]
+from bot.modes.zen import ZenMode
 
-MODES = []
+MODES = [
+    # MarathonMode,
+    ZenMode,
+]

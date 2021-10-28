@@ -8,4 +8,16 @@ skins:
       # or the text size exceeds 4096 chars
       pieces: ['⬛', '🟦', '🟧', '🟦', '🟩', '🟥', '🟪', '🟨', '🔳', '◽']
 
+      # The emotes for the buttons
+      controls:
+          # Left/right
+          drag: ['◀️', '▶️']
+          # DAS left/right
+          das: ['⏪', '⏩']
+          # Soft drop/hard drop
+          drop: ['🔽', '⏬']
+          # Rotate ccw, cw, 2x
+          rotate: ['↪️', '↩️', '🔄']
+          swap: '🔀'
+
 status-channel: null
