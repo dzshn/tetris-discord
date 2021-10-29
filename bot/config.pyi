@@ -1,0 +1,3 @@
+from typing import Any
+
+data: dict[str, Any] = ...

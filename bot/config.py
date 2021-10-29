@@ -1,6 +1,7 @@
 import pathlib
 import sys
 import warnings
+from typing import Optional
 
 import yaml
 
@@ -31,8 +32,8 @@ class _Config:
 
     def __init__(self):
         self._cache_time = 0
-        self._cached_cfg: dict = None
-        self._sample_cfg: dict = None
+        self._cached_cfg: Optional[dict] = None
+        self._sample_cfg: Optional[dict] = None
 
     @property
     def data(self) -> dict:
@@ -70,9 +71,6 @@ class _Config:
                 return self._sample_cfg
 
         return self._cached_cfg
-
-    def __getitem__(self, key):
-        return self.data[key]
 
 
 sys.modules[__name__] = _Config()

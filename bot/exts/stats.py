@@ -46,7 +46,7 @@ class Stats(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def update_status(self):
-        channel = self.bot.get_channel(config['status-channel'])
+        channel = self.bot.get_channel(config.data['status-channel'])
         if channel is None:
             self.update_status.cancel()
             return

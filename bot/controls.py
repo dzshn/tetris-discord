@@ -37,7 +37,7 @@ class Controls(discord.ui.View):
 
 class DefaultControls(Controls):
     def __init__(self, game: BaseGame, **kwargs):
-        emotes = config['skins'][0]['controls']
+        emotes = config.data['skins'][0]['controls']
         super().__init__(game, **kwargs)
 
         @self.button(label='\u200c', disabled=True, style=discord.ButtonStyle.grey)

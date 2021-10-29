@@ -28,7 +28,9 @@ class ZenMode(base.BaseMode, name='zen', game_cls=ZenGame):
             content=None,
             embed=discord.Embed(
                 color=0xFA50A0,
-                description=game.render(tiles=config['skins'][0]['pieces'], lines=16),
+                description=game.render(
+                    tiles=config.data['skins'][0]['pieces'], lines=16
+                ),
             ),
             view=view,
         )
