@@ -14,7 +14,6 @@ class OnMaintenance(commands.CheckFailure):
 class Manager(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.games: dict[int, discord.View] = {}
 
     PULL_OPTS = ('nopull', 'pull', 'forcepull')
 
@@ -85,15 +84,6 @@ class Manager(commands.Cog):
         # FIXME: This forks and doesn't inherit the console (if any)
         subprocess.Popen(psutil.Process().cmdline())
         await self.bot.close()
-
-    @commands.command(aliases=['cancel', 'quit'])
-    async def stop(self, ctx: commands.Context):
-        """Stops the current game"""
-        if ctx.author.id not in self.games:
-            raise commands.CheckFailure("There isn't any game running!")
-
-        self.games[ctx.author.id].stop()
-        await ctx.message.add_reaction('\N{waving hand sign}')
 
 
 def setup(bot: commands.Bot):
