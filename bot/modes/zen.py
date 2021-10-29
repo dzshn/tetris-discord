@@ -8,7 +8,7 @@ from bot.modes import base
 
 
 class ZenGame(engine.BaseGame):
-    ...
+    pass
 
 
 class ZenMode(base.BaseMode, name='zen', game_cls=ZenGame):
@@ -16,8 +16,8 @@ class ZenMode(base.BaseMode, name='zen', game_cls=ZenGame):
         game = ZenGame()
         view = controls.DefaultControls(game)
         message = await ctx.send(content='\u200c', view=view)
-        view.callback = self.get_callback(game, message, view)
-        view.interaction_check = self.get_check(ctx)
+        view.set_callback(self.get_callback(game, message, view))
+        view.set_check(self.get_check(ctx))
         await self.update_message(game, message, view)
         await view.wait()
 

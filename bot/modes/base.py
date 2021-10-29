@@ -1,5 +1,6 @@
 import abc
 import functools
+from typing import Any, ClassVar
 
 import discord
 from discord.ext import commands
@@ -12,11 +13,14 @@ class ABCMeta(abc.ABCMeta):
     # See https://bugs.python.org/issue43827 and https://github.com/python/cpython/pull/25385
     def __new__(mcls, name, bases, namespace, /, **kwargs):
         cls = type.__new__(mcls, name, bases, namespace, **kwargs)
-        abc._abc_init(cls)
+        abc._abc_init(cls)  # type: ignore
         return cls
 
 
 class BaseMode(metaclass=ABCMeta):
+    name: ClassVar[str]
+    game_cls: ClassVar[type]
+
     __instance = None
 
     def __new__(cls):
@@ -27,7 +31,7 @@ class BaseMode(metaclass=ABCMeta):
 
     def __init_subclass__(cls, /, name: str, game_cls: BaseGame):
         cls.name = name
-        cls.game_cls = game_cls
+        cls.game_cls = game_cls  # type: ignore
 
     @abc.abstractmethod
     async def command(self, ctx: commands.Context):
@@ -35,7 +39,7 @@ class BaseMode(metaclass=ABCMeta):
 
     @abc.abstractmethod
     async def update_message(
-        self, game: BaseGame, message: discord.Message, view: discord.ui.View
+        self, game: Any, message: discord.Message, view: discord.ui.View
     ):
         pass
 

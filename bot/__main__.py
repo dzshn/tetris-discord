@@ -28,7 +28,7 @@ class TetrisBot(commands.Bot):
             raise ImportError(name=name)
 
         for module in pkgutil.walk_packages(
-            exts.__path__, exts.__name__ + '.', onerror=_imp_err
+            exts.__path__, exts.__name__ + '.', onerror=_imp_err  # type: ignore
         ):
             try:
                 self.load_extension(module.name)

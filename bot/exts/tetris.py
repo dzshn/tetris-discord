@@ -13,7 +13,7 @@ class Tetris(commands.Cog):
                 return await mode().command(ctx)
 
             setattr(cls, mode.name, cmd)
-            self.__cog_commands__ += (cmd._update_copy(cls.__cog_settings__),)
+            self.__cog_commands__ += (cmd._update_copy(cls.__cog_settings__),)  # type: ignore
 
         return self
 

@@ -1,3 +1,6 @@
+from collections.abc import Callable
+from typing import Optional
+
 import discord
 
 from bot import config
@@ -5,43 +8,55 @@ from bot.engine import BaseGame
 
 
 class Controls(discord.ui.View):
-    def __init__(self, game, **kwargs):
+    def __init__(self, game: BaseGame):
         self.game = game
-        kwargs.pop('timeout', None)
-        super().__init__(**kwargs, timeout=600)
+        # FIXME: how do you even type coroutines what
+        self._callback: Optional[Callable] = None
+        self._check: Optional[Callable] = None
+        super().__init__(timeout=600)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        # return interaction.user == self
-        return True
+        if self._check is not None:
+            return await self._check(interaction)
+
+        return False
+
+    def set_check(self, func: Callable):
+        self._check = func
+
+    async def callback(self, interaction: discord.Interaction):
+        if self._callback is not None:
+            await self._callback(interaction)
+
+    def set_callback(self, func: Callable):
+        self._callback = func
 
     async def on_error(self, error: Exception, *_):
         raise error  # Let the error handler take care of it
 
     def button(self, **kwargs):
         def wrapper(func):
-            button = discord.ui.Button(**kwargs)
+            button: discord.ui.Button = discord.ui.Button(**kwargs)
+            # Above is for `bot/controls.py:39: error: Need type annotation for "button"`
 
             async def cb_wrapper(*_):
                 func()
                 await self.callback(*_)
 
-            button.callback = cb_wrapper
+            button.callback = cb_wrapper  # type: ignore
             self.add_item(button)
             return func
 
         return wrapper
 
-    async def callback(self, interaction: discord.Interaction):
-        pass
-
 
 class DefaultControls(Controls):
-    def __init__(self, game: BaseGame, **kwargs):
+    def __init__(self, game: BaseGame):
         emotes = config.data['skins'][0]['controls']
-        super().__init__(game, **kwargs)
+        super().__init__(game)
 
         @self.button(label='\u200c', disabled=True, style=discord.ButtonStyle.grey)
-        def _():
+        def _0():
             pass
 
         @self.button(emoji=emotes['drop'][1])
@@ -50,7 +65,7 @@ class DefaultControls(Controls):
             game.lock_piece()
 
         @self.button(label='\u200c', disabled=True, style=discord.ButtonStyle.grey)
-        def _():
+        def _1():
             pass
 
         @self.button(emoji=emotes['swap'])

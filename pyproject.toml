@@ -16,6 +16,8 @@ redis = "^3.5.3"
 hiredis = "^2.0.0"
 PyYAML = "^6.0"
 nextcord = {extras = ["speed"], version = "^2.0.0-alpha.3"}
+types-redis = "^3.5.15"
+types-psutil = "^5.8.13"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
@@ -37,7 +39,12 @@ warn_unused_configs = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_unreachable = true
+check_untyped_defs = true
 allow_redefinition = true # Remove later?
+
+[[tool.mypy.overrides]]
+module = 'fakeredis.*'
+ignore_missing_imports = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

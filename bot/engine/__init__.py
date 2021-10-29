@@ -11,29 +11,11 @@ from bot.engine.consts import SHAPES
 from bot.engine.consts import SRS_I_KICKS
 from bot.engine.consts import SRS_KICKS
 
-PieceType = enum.IntEnum('PieceType', 'I L J S Z T O')
-
 Seed = Union[str, bytes, int]
-QueueSeq = list[PieceType]
+QueueSeq = list['PieceType']
 
-
-class Position(NamedTuple):
-    x: int = 0
-    y: int = 0
-
-    def __add__(self, other: tuple) -> 'Position':
-        if isinstance(other, tuple):
-            x, y = other
-            return Position(x=self.x + x, y=self.y + y)
-
-        return NotImplemented
-
-    def __sub__(self, other: tuple) -> 'Position':
-        if isinstance(other, tuple):
-            x, y = other
-            return Position(x=self.x - x, y=self.y - y)
-
-        return NotImplemented
+PieceType = enum.IntEnum('PieceType', 'I L J S Z T O')
+Position = NamedTuple('Position', [('x', int), ('y', int)])
 
 
 class Piece:
@@ -101,10 +83,11 @@ class Piece:
         value %= 4
         previous = self._rot
         if self.copy(rot=value).overlaps():
-            kick_table = SRS_I_KICKS if self.type == PieceType.I else SRS_KICKS
+            kick_table: list[list[list[tuple[int, int]]]]
+            kick_table = SRS_I_KICKS if self.type == PieceType.I else SRS_KICKS  # type: ignore
             for x, y in kick_table[previous][value]:
                 if not self.copy(x=self.x + x, y=self.y + y, rot=value).overlaps():
-                    self.pos += (x, y)
+                    self.pos = Position(self.x + x, self.y + y)
                     break
             else:
                 return
@@ -123,7 +106,7 @@ class Piece:
             'y': self.y,
             'rot': self.rot,
         } | kwargs
-        return Piece(**kwargs)
+        return Piece(**kwargs)  # type: ignore
 
     def overlaps(self) -> bool:
         board = self.board

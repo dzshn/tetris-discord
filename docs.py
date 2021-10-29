@@ -23,7 +23,7 @@ class DocsRequestHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory='docs/', **kwargs)
 
     def translate_path(self, path: str) -> str:
-        path = super().translate_path(path)
+        path = super().translate_path(path)  # type: ignore
 
         if not pathlib.Path(path).exists():
             return 'docs/index.html'

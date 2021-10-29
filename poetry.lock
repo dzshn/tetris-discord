@@ -435,6 +435,22 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "types-psutil"
+version = "5.8.13"
+description = "Typing stubs for psutil"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "types-redis"
+version = "3.5.15"
+description = "Typing stubs for redis"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "3.10.0.2"
 description = "Backported and Experimental Type Hints for Python 3.5+"
@@ -472,7 +488,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "d54c3ffa7782828c10d094841150faa3b6de2e5d66f29053564e9ac82db3fb72"
+content-hash = "fad5f238d1d6cc58906a1ef8d2fee76fe56f256c1f8642f3f6de47518d3855a7"
 
 [metadata.files]
 aiodns = [
@@ -1090,6 +1106,14 @@ toml = [
 tomli = [
     {file = "tomli-1.2.2-py3-none-any.whl", hash = "sha256:f04066f68f5554911363063a30b108d2b5a5b1a010aa8b6132af78489fe3aade"},
     {file = "tomli-1.2.2.tar.gz", hash = "sha256:c6ce0015eb38820eaf32b5db832dbc26deb3dd427bd5f6556cf0acac2c214fee"},
+]
+types-psutil = [
+    {file = "types-psutil-5.8.13.tar.gz", hash = "sha256:0e7f6b921477576f241f06eb01f97d7b50aeb4b2264a7ab65c927d74ded854d0"},
+    {file = "types_psutil-5.8.13-py3-none-any.whl", hash = "sha256:a37394123c8a635223e4e5e3a9f5212f66b08279da7b38db317e113f9ab6dcd0"},
+]
+types-redis = [
+    {file = "types-redis-3.5.15.tar.gz", hash = "sha256:e52be0077ca1189d8cce813a20c2a70e9e577f34ab898371c6cbed696a88bdee"},
+    {file = "types_redis-3.5.15-py3-none-any.whl", hash = "sha256:e617c08bff88449b52f6dbdaa9bb81a806f27c89fd30bbf98fe9683ed5d1046a"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.10.0.2-py2-none-any.whl", hash = "sha256:d8226d10bc02a29bcc81df19a26e56a9647f8b0a6d4a83924139f4a8b01f17b7"},

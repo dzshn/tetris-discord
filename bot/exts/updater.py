@@ -18,7 +18,7 @@ class Updater(commands.Cog):
     def __init__(self):
         ...
 
-    async def cog_check(self, ctx: commands.Context):
+    async def cog_check(self, ctx: commands.Context) -> bool:  # type: ignore
         if not await ctx.bot.is_owner(ctx.author):
             raise commands.NotOwner()
 
@@ -58,7 +58,9 @@ class Updater(commands.Cog):
                         'git pull --ff-only', stdout=PIPE, stderr=STDOUT
                     )
                     pull_stdout, _ = await pull_proc.communicate()
-                    await ctx.send(f'```$ git pull --ff-only\n{pull_stdout}```')
+                    await ctx.send(
+                        f'```$ git pull --ff-only\n{pull_stdout.decode()}```'
+                    )
 
             else:
                 await ctx.send('Nothing to pull, skipping')
