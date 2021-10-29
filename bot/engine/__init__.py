@@ -1,4 +1,3 @@
-import dataclasses
 import enum
 import math
 import random
@@ -37,46 +36,8 @@ class Position(NamedTuple):
         return NotImplemented
 
 
-@dataclasses.dataclass
-class Frame:
-    pos: Position
-    rot: int
-
-    @property
-    def x(self) -> int:
-        return self.pos.x
-
-    @property
-    def y(self) -> int:
-        return self.pos.y
-
-    def __add__(self, other: 'Frame') -> 'FrameDelta':
-        if isinstance(other, Frame):
-            return FrameDelta(self, other)
-
-        return NotImplemented
-
-
-@dataclasses.dataclass
-class FrameDelta:
-    previous: Frame
-    current: Frame
-
-    @property
-    def x(self) -> int:
-        return self.current.x - self.previous.x
-
-    @property
-    def y(self) -> int:
-        return self.current.y - self.previous.y
-
-    @property
-    def rotation(self) -> int:
-        return self.current.rot - self.previous.rot
-
-
 class Piece:
-    __slots__ = ('board', 'type', 'pos', '_rot', 'frame', 'delta')
+    __slots__ = ('board', 'type', 'pos', '_rot')
 
     def __init__(
         self,
@@ -96,14 +57,6 @@ class Piece:
             self.pos = Position(x, y)
 
         self._rot = rot
-        self.frame = Frame(pos=self.pos, rot=self.rot)
-        self.delta = None
-
-    def new_frame(self):
-        new = Frame(pos=self.pos, rot=self.rot)
-        if new != self.frame:
-            self.delta = self.frame + new
-            self.frame = new
 
     @property
     def x(self) -> int:
@@ -122,7 +75,6 @@ class Piece:
             target += step
 
         self.pos = Position(target, self.y)
-        self.new_frame()
 
     @property
     def y(self) -> int:
@@ -139,7 +91,6 @@ class Piece:
             target += step
 
         self.pos = Position(self.x, target)
-        self.new_frame()
 
     @property
     def rot(self) -> int:
@@ -159,7 +110,6 @@ class Piece:
                 return
 
         self._rot = value
-        self.new_frame()
 
     @property
     def shape(self) -> NDArray[np.int8]:
@@ -237,15 +187,10 @@ class BaseGame:
         self.queue = Queue(
             queue=kwargs.get('queue') or [], bag=kwargs.get('bag') or [], seed=self.seed
         )
-        # XXX: Does this refactor actually work with other
-        #      board sizes? that could be interesting
         self.board = np.zeros((40, 10), dtype=np.int8)
         self.piece = Piece(self.board, kwargs.get('piece') or self.queue.pop())
         self.hold: Optional[int] = None
         self.hold_lock = False
-
-    # TODO: Make `self.piece` an property and implement
-    #       the `on_frame` event there
 
     def reset(self):
         pass
