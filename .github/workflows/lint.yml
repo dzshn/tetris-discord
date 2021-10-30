@@ -19,7 +19,6 @@ jobs:
             - name: Install project
               run: |
                   poetry install
-                  echo $(poetry env info -p)/lib/python*/site-packages/{discord,nextcord}/py.typed
 
             - name: Lint with flake8
               run: |
