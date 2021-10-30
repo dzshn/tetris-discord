@@ -15,9 +15,9 @@ fakeredis = "^1.6.1"
 redis = "^3.5.3"
 hiredis = "^2.0.0"
 PyYAML = "^6.0"
-nextcord = {extras = ["speed"], version = "^2.0.0-alpha.3"}
 types-redis = "^3.5.15"
 types-psutil = "^5.8.13"
+nextcord = {extras = ["speed"], version = "^2.0.0-alpha.3"}
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
