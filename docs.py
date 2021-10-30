@@ -20,7 +20,8 @@ args = parser.parse_args()
 
 class DocsRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory='docs/', **kwargs)
+        kwargs['directory'] = 'docs/'
+        super().__init__(*args, **kwargs)
 
     def translate_path(self, path: str) -> str:
         path = super().translate_path(path)  # type: ignore
