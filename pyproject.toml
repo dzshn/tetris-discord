@@ -17,7 +17,7 @@ hiredis = "^2.0.0"
 PyYAML = "^6.0"
 types-redis = "^3.5.15"
 types-psutil = "^5.8.13"
-nextcord = {extras = ["speed"], version = "^2.0.0-alpha.3"}
+nextcord = {git = "https://github.com/nextcord/nextcord", rev = "c9a17374ac3568dc704e46bb856811d3a85038d3", extras = ["speed"]}
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
