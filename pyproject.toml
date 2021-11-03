@@ -18,7 +18,7 @@ yapf = "^0.31.0"
 toml = "^0.10.2"
 flake8 = "^4.0.1"
 rope = "^0.20.1"
-isort = "^5.9.3"
+isort = "^5.10.0"
 
 [tool.yapf]
 based_on_style = "google"
