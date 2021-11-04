@@ -17,54 +17,61 @@ Also, for development progress you can check the [v1.0.0 project](https://github
 
 ## Setup
 
+_**Docker package soon:tm:**_
+
 If you wish to contribute or just fork off this, the following should work:
 
 **Requirements:**
 
--   Python >= 3.9
+-   [Python](https://www.python.org/) >= 3.9 \*
 -   [Poetry](https://python-poetry.org/)
+-   [redis-server](https://redis.io/) _(optional\*)_
+-   A discord bot account _(create one [here](https://discord.com/developers/applications)!)_
 
-And of course, a discord bot token, create one [here](https://discord.com/developers/applications)
+_⁰\*: currently tested on `3.9.7`/`3.9.5`, I recommended [pyenv](https://github.com/pyenv/pyenv/) if you don't have these_
 
-**Install the project:**
+_¹\*: if no redis server is found running on `localhost:6379`, the bot will fallback to [fakeredis](https://github.com/jamesls/fakeredis) and will **not** save any data_
 
-Simply run `poetry install`.
+**Install the project and dependencies:**
 
-**Set the token:**
+Simply run `poetry install`!
 
-Create a new file named `TOKEN` on the project's root and write the bot token into it
+**Configure the bot**
 
-**Edit your config** _(optional)_:
+-   **Set the token**
 
-If you skip this option, `config_defaults.json` will be copied automatically to `config.json`
+    Create a new file named `TOKEN` on the project's root and write the bot token into it, this is the only required setting
 
--   Copy `config_defaults.json` into `config.json`
--   Edit `"prefix": "tt!"` to whatever you'd prefer
--   If wanted, setup skins:
-    -   Upload the emotes into a server you and the bot share, named as so:
-        -   `I_`, `L_`, `J_`, `S_`, `Z_`, `O_` - the actual piece tiles
-        -   `BG` - The background tile
-        -   `GA` - Garbage piece tile
-        -   `GH` - Ghost piece tile
-    -   For each skin, set the following:
-        -   `"name": ...`: whatever you wish
-        -   `"pieces": ...`: Should be a list of the emote formats (i.e. `<:NAME:ID>`), ordered as `BG`, `I_`, `L_`, `J_`, `S_`, `Z_`, `O_`, `GA`, `GH`
+-   **Setup `config.yaml`**:
+
+    Copy `config.sample.yaml` into `config.yaml` and edit it as necessary, the most important settings are:
+
+    _**Note:** to prevent issues with old configs, if the config isn't found to be complete, it'll be ignored and `config.sample.yaml` will be used instead, so make sure to keep all config keys!_
 
 **Run the bot:**
 
-Enter a pipenv shell with `poetry shell` and run `python3 -m bot`
+_**::** If you wish to use redis, just run `redis-server redis.conf` on another terminal_
 
-**Set the status message** _(optional)_:
+Simply:
 
-On the channel you want, run `[prefix]setpersiststs`, this is the same on #data in the discord server and is periodically edited with the bot's stats
+```sh
+~$ poetry shell
+Spawning shell within ~/.cache/pypoetry/virtualenvs/tetris-...-py3.9
+(tetris-...-py3.9) ~$ python -m bot
 
-**That's it, you should now have an instance running! :D**
+# ..or run directly:
+~$ poetry run python3 -m bot
+```
+
+**That's it, you should now have an instance running! :tada:**
 
 ## How
 
-A bit too much of free time, [`discord.py`](https://github.com/Rapptz/discord.py/), [`numpy`](https://numpy.org/), [`tinydb`](https://tinydb.readthedocs.io/) and maybe some magic.
+A bit too much of free time, a lot of coffee, ~~[`discord.py`](https://github.com/Rapptz/discord.py/)~~ [`nextcord`](https://github.com/nextcord/nextcord) (!), [`numpy`](https://numpy.org/), ~~[`tinydb`](https://tinydb.readthedocs.io/)~~ [`redis`](https://redis.io/), probably at least 40 deps and sub-deps... and maybe some magic.
 
-Yes, this gets rate-limited, yes, it does only use emotes, no, it is not resource-heavy at all, no, I don't mind if you break the bot (please do report it though!).
+erh.. I mean, the internal stuff pretty much what you'd need implementing a tetris game with proper [SRS](https://harddrop.com/wiki/SRS) rotation (I know that's _just_ the rotation system, but if you take a look around you'll probably understand why!), so not much specific on that.. as with discord, it's just a "button click" -> "update message" loop, and the board is "rendered" using emotes
+
+but, if you're interested in more technical stuff, the [`CONTRIBUTING.md`](CONTRIBUTING.md) file has some info on the project's structure!
 
 ## Credits
 
