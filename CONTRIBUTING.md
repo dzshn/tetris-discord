@@ -1,90 +1,64 @@
-# Intro
+hi!! here are some info that may or may not help you help this project!
 
-Firstly, thanks for considering contributing!!
-
-Below is some info that might help you get started, it shouldn't be a long read nor have strict rulings, if you have any questions or need any kind of help, please please don't hesitate in asking on the [Discord server](https://discord.gg/ytJj3eQ74B)! New contributors are really important and, I do wish to help!!
-
-# Table of contents
-
-1. [Intro](#intro)
-2. [Opening an issue](#opening-an-issue)
-3. [Making a pull request](#making-a-pull-request)
-4. [Navigating the codebase](#navigating-the-codebase)
+if you have any specific questions, you can ask them on the [Discord server](https://discord.gg/ytJj3eQ74B) or [contact me](https://dzshn.xyz) directly!
 
 # Opening an issue
 
-Is something wrong? have an enhancement idea? try this! if you're not comfortable with doing this on github, you can go to #support on the server!
+You can do so [here](https://github.com/dzshn/tetris-discord/issues/new/choose)! whether it's for a feature request or a bug or anything, you may ask it there
 
-You can open an issue [here](https://github.com/dzshn/tetris-discord/issues/new/choose)! if you need help writing one, the following may help:
+for short questions or just simple things in general, I'd really recommend not using the issue tracker for it, but don't worry too much about it!
 
-## For bugs
+something something provide as much info as you can byebye ty <3
 
--   What's actually supposed to happen?
--   What actually happens?
--   Are there errors reported? if so, what are they?
--   Can you reproduce it? if so, provide steps on doing so
--   Can you upload an screenshot?
+# Making a PR
 
-## For feature requests
+Feel free to do so!!! there are currently no proposed rules for it, but, if your PR is a code change, I'd like you to try to make sure it passes the [lint pipeline](.github/workflows/lint.yml):
 
--   What's your idea? have you considered alternatives?
--   Do you have some examples on how it'd be useful for other people?
--   Is it a breaking change? (i.e. could it cause conflicts with the current code/data, or change how the bot is controlled)
+-   after installing the project, if you did not provide the `--no-dev` option, you can format & lint the project with the same stuff by running:
 
----
+    ```sh
+    # actual usage of tox soon™
+    ~$ poetry shell
+    (tetris-...-py3.9) ~$ black .   # <- formatter
+    (tetris-...-py3.9) ~$ isort .   # <- very cool thing that sorts imports
+    (tetris-...-py3.9) ~$ flake8 .  # <- will scream if there is a possible error
+    (tetris-...-py3.9) ~$ mypy .    # <- will scream if types aren't properly set
+    ```
 
-Regardless, your issue might be worth looking into even if missing info!
+If you aren't able to do so, don't worry! those can be fixed via a rebase!
 
-# Making a pull request
+# what does this do!!!!!!!
 
-Do feel free to do so! if you need more guidance for the codebase, you can ask me directly or open a draft PR! also, it'd help to ensure these:
+good question! the code isn't properly documented (yet!), so here's some info I think might be helpful for starting!
 
-## For code changes
+**Structure:**
 
-You can read more on setting up an instance on the project's `README.md`, if you encounter any issues, also do contact me for help!
+Currently, the bot itself is a package ([`bot/`](bot)), split into three major ones + a few single-file scripts:
 
--   You should format the code using [`yapf`](https://pypi.org/project/yapf/) and check for errors with [`flake8`](https://flake8.pycqa.org/) (these are also set as dev dependencies, so you should have them in your pipenv!)
--   If your code is not backwards compatible, try to note how an instance would be migrated
+-   [`bot.engine`](bot/engine): This has the core stuff for creating new games, mainly the `BaseGame` class, which is subclassed for each mode to add their own functionality. In fact though, this class can be used on it's own! e.g.::
 
-It would also help to provide info on why the change is needed and how it'd help
+    ```py
+    >>> from bot.engine import BaseGame
+    >>> game = BaseGame(seed='abcd')
+    >>> game.queue
+    Queue(queue=[<PieceType.S: 4>, <PieceType.T: 6>, <PieceType.O: 7>, <PieceType.Z: 5>], bag=[<PieceType.I: 1>, <PieceType.L: 2>])
+    >>> p = lambda: print(game.render(lines=8))
+    >>> p()
 
-## For documentation changes
+       @
+       @@@
+    >>> game.drag(y=-2)
+    >>> game.hard_drop()
+    >>> p()
 
-uhmmmm, not much! just ensure the wording lines up with the rest of the docs and,,, yeah!
+        @@
+     J @@
+     JJJ
+    >>>
+    ```
 
-You can test how it'll look by running `python3 docs.py`, which will open a proper server locally for testing
+    the main methods for this class are: `reset()`, `lock_piece()`, `render()`, `swap()`, `drag()`, `rotate()`, `hard_drop()`, `soft_drop()` (which are hopefully named concisely enough)
 
----
+-   [`bot.exts`](bot/exts): These are all the d.py cogs that actually implement the discord commands, it's automatically loaded by `__main__.py`
 
-And, the following might as well help you:
-
-# Navigating the codebase
-
-It is currently very subject to change and possibly confusing to go through, but do feel free to ask me about anything from it, I'm willing to help as much as I can :)
-
-Most important modules are:
-
--   `bot/exts/*` ~ the actual d.py extensions that have all the commands
--   `bot/exts/modes/*` ~ these create the games
--   `bot/lib/game.py` ~ this is the actual game object, which other modes inherit from and manage via the commands
--   `bot/lib/controls.py` ~ the `discord.View` objects with callbacks to controlling the game objects
-
-As well as other core stuff:
-
--   `bot/exts/manager.py` ~ currently handles updating the bot and closing games
--   `bot/exts/settings.py` ~ handles editing user settings
--   `bot/lib/maps.py` ~ currently the format used for saving boards (i.e. in zen mode)
-
-There is also another external module, [yade](https://github.com/dzshn/yade), which is an project of mine with some quite useful commands for debugging, all of them are owner-only:
-
--   `[prefix]eval <code>` ~ directly evaluates code, you can access the bot object as `b` and the context as `ctx`
--   `[prefix]shell <command>` ~ executes given command in an async shell
--   `[prefix]geterror <token>` ~ uncaught errors get stored under a token, you can use that to get the traceback/context
-
-Also! documentation is written as follows:
-
-In short: the website is a SPA (Single-page application) written using [vue.js](https://vuejs.org/) and [vue-router](https://next.router.vuejs.org/) (not python, sorry!!), new pages are written in `docs/pages/` and added to the index in `docs/main.js`, these are markdown files parsed by [marked.js](https://marked.js.org/), and are only loaded as-needed
-
-Most of the html code is actually at main.js, the "pages" are a lie :)
-
-_(and yes, this does break 404s)_
+-   [`bot.modes`](bot/modes): The actual game modes! each mode is a subclass of the base ABC (on [base.py](bot/modes/base.py)) that also goes along with a subclass of `BaseGame` (on [engine](bot/engine/__init__.py)), these are probably the scripts most prone to bugs too :p
