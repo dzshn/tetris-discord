@@ -19,26 +19,30 @@ Position = NamedTuple('Position', [('x', int), ('y', int)])
 
 
 class Piece:
-    __slots__ = ('board', 'type', 'pos', '_rot')
+    __slots__ = ('board', 'type', 'pos', 'r')
 
     def __init__(
         self,
         board: NDArray[np.int8],
-        t: PieceType,
+        type: PieceType,
         x: Optional[int] = None,
         y: Optional[int] = None,
-        rot: int = 0,
+        pos: Optional[Position] = None,
+        r: int = 0,
     ):
         self.board = board
-        self.type = t
-        if x is None and y is None:
-            # e.g. for size (40, 10), align at (22, 3)
-            self.pos = Position(board.shape[0] // 2 - 2, (board.shape[1] + 3) // 2 - 3)
+        self.type = type
+        if pos is not None:
+            self.pos = pos
         else:
-            assert x is not None and y is not None, 'x, y should both be specified'
+            if x is None:
+                x = board.shape[0] // 2 - 2
+            if y is None:
+                y = (board.shape[1] + 3) // 2 - 3
+
             self.pos = Position(x, y)
 
-        self._rot = rot
+        self.r = r
 
     @property
     def x(self) -> int:
@@ -46,17 +50,7 @@ class Piece:
 
     @x.setter
     def x(self, value: int):
-        target = self.x
-        # FIXME: using a for loop without proper var but
-        #        incrementing `target` is redundant, same for `y.setter`
-        step = int(math.copysign(1, value - self.x))
-        for _ in range(abs(self.x - value)):
-            if self.copy(x=target + step).overlaps():
-                break
-
-            target += step
-
-        self.pos = Position(target, self.y)
+        self.pos = Position(value, self.y)
 
     @property
     def y(self) -> int:
@@ -64,49 +58,15 @@ class Piece:
 
     @y.setter
     def y(self, value: int):
-        target = self.y
-        step = int(math.copysign(1, value - self.y))
-        for _ in range(abs(self.y - value)):
-            if self.copy(y=target + step).overlaps():
-                break
-
-            target += step
-
-        self.pos = Position(self.x, target)
-
-    @property
-    def rot(self) -> int:
-        return self._rot
-
-    @rot.setter
-    def rot(self, value: int):
-        value %= 4
-        previous = self._rot
-        if self.copy(rot=value).overlaps():
-            kick_table: list[list[list[tuple[int, int]]]]
-            kick_table = SRS_I_KICKS if self.type == PieceType.I else SRS_KICKS  # type: ignore
-            for x, y in kick_table[previous][value]:
-                if not self.copy(x=self.x + x, y=self.y + y, rot=value).overlaps():
-                    self.pos = Position(self.x + x, self.y + y)
-                    break
-            else:
-                return
-
-        self._rot = value
+        self.pos = Position(self.x, value)
 
     @property
     def shape(self) -> NDArray[np.int8]:
-        return np.array(SHAPES[self.type - 1][self.rot], dtype=np.int8)
+        return np.array(SHAPES[self.type - 1][self.r], dtype=np.int8)
 
-    def copy(self, **kwargs):
-        kwargs = {
-            'board': self.board,
-            't': self.type,
-            'x': self.x,
-            'y': self.y,
-            'rot': self.rot,
-        } | kwargs
-        return Piece(**kwargs)  # type: ignore
+    def copy(self, **kwargs) -> 'Piece':
+        kwargs = {'x': self.x, 'y': self.y, 'r': self.r} | kwargs
+        return Piece(board=self.board, type=self.type, **kwargs)
 
     def overlaps(self) -> bool:
         board = self.board
@@ -208,7 +168,12 @@ class BaseGame:
     def render(self, tiles: list[str] = list(' ILJSZTOX@'), lines: int = 20) -> str:
         board = self.board.copy()
         ghost = self.piece.copy()
-        ghost.x += 30
+
+        for ix in range(ghost.x, self.board.shape[0]):
+            if ghost.copy(x=ix).overlaps():
+                break
+            ghost.x = ix
+
         for x, y in ghost.shape + ghost.pos:
             board[x, y] = 9
 
@@ -226,3 +191,46 @@ class BaseGame:
             self.hold, self.piece = self.piece.type, Piece(self.board, self.hold)
 
         self.hold_lock = True
+
+    def drag(self, x: int = 0, y: int = 0):
+        self.move(self.piece.x + x, self.piece.y + y)
+
+    def move(self, x: int = 0, y: int = 0):
+        piece = self.piece
+        new_x, new_y = from_x, from_y = piece.pos
+
+        x_step = int(math.copysign(1, x - from_x))
+        for ix in range(from_x, x + x_step, x_step):
+            if piece.copy(x=ix).overlaps():
+                break
+            new_x = ix
+
+        y_step = int(math.copysign(1, y - from_y))
+        for iy in range(from_y, y + y_step, y_step):
+            if piece.copy(y=iy).overlaps():
+                break
+            new_y = iy
+
+        piece.pos = Position(new_x, new_y)
+
+    def rotate(self, turns: int):
+        piece = self.piece
+        from_r = piece.r
+        from_x, from_y = piece.pos
+        new_r = (piece.r + turns) % 4
+
+        kick_table = SRS_I_KICKS if piece.type == PieceType.I else SRS_KICKS
+        kicks = [(+0, +0)] + kick_table[from_r][new_r]  # type: ignore
+
+        for x, y in kicks:
+            if not piece.copy(x=from_x + x, y=from_y + y, r=new_r).overlaps():
+                piece.pos = Position(from_x + x, from_y + y)
+                piece.r = new_r
+                break
+
+    def hard_drop(self):
+        self.drag(x=self.board.shape[0])
+        self.lock_piece()
+
+    def soft_drop(self, height: int = 5):
+        self.drag(x=height)

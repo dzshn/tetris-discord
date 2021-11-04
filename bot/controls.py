@@ -61,8 +61,7 @@ class DefaultControls(Controls):
 
         @self.button(emoji=emotes['drop'][1])
         def hard_drop():
-            game.piece.x += game.board.shape[0]
-            game.lock_piece()
+            game.hard_drop()
 
         @self.button(label='\u200c', disabled=True, style=discord.ButtonStyle.grey)
         def _1():
@@ -74,24 +73,24 @@ class DefaultControls(Controls):
 
         @self.button(emoji=emotes['rotate'][2])
         def rotate_180():
-            game.piece.rot += 2
+            game.rotate(2)
 
         @self.button(emoji=emotes['drag'][0])
         def move_left():
-            game.piece.y -= 1
+            game.drag(y=-1)
 
         @self.button(emoji=emotes['drop'][0])
         def soft_drop():
-            game.piece.x += 5
+            game.soft_drop()
 
         @self.button(emoji=emotes['drag'][1])
         def move_right():
-            game.piece.y += 1
+            game.drag(y=+1)
 
         @self.button(emoji=emotes['rotate'][0])
         def rotate_ccw():
-            game.piece.rot -= 1
+            game.rotate(-1)
 
         @self.button(emoji=emotes['rotate'][1])
         def rotate_cw():
-            game.piece.rot += 1
+            game.rotate(+1)
