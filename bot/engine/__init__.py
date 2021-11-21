@@ -65,8 +65,13 @@ class Piece:
         return np.array(SHAPES[self.type - 1][self.r], dtype=np.int8)
 
     def copy(self, **kwargs) -> 'Piece':
-        kwargs = {'x': self.x, 'y': self.y, 'r': self.r} | kwargs
-        return Piece(board=self.board, type=self.type, **kwargs)
+        return Piece(
+            board=self.board,
+            type=self.type,
+            x=kwargs.get('x', self.x),
+            y=kwargs.get('y', self.y),
+            r=kwargs.get('r', self.r),
+        )
 
     def overlaps(self) -> bool:
         board = self.board
@@ -123,8 +128,6 @@ class Queue:
 
 
 class BaseGame:
-    __slots__ = ('seed', 'queue', 'board', 'piece', 'hold', 'hold_lock')
-
     def __init__(self, **kwargs):
         self.seed = kwargs.get('seed') or secrets.token_bytes()
         self.queue = Queue(

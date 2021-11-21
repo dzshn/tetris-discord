@@ -4,10 +4,11 @@ from discord.ext import commands
 from bot import config
 from bot import controls
 from bot import engine
+from bot.engine.mixins import StandardScore
 from bot.modes import base
 
 
-class ZenGame(engine.BaseGame):
+class ZenGame(engine.BaseGame, StandardScore):
     pass
 
 
@@ -24,13 +25,11 @@ class ZenMode(base.BaseMode, name='zen', game_cls=ZenGame):
     async def update_message(
         self, game: ZenGame, message: discord.Message, view: discord.ui.View
     ):
-        await message.edit(
-            content=None,
-            embed=discord.Embed(
-                color=0xFA50A0,
-                description=game.render(
-                    tiles=config.data['skins'][0]['pieces'], lines=16
-                ),
-            ),
-            view=view,
+        embed = discord.Embed(
+            color=0xFA50A0,
+            description=game.render(tiles=config.data['skins'][0]['pieces'], lines=16),
         )
+
+        embed.add_field(name='Score', value=game.score)
+
+        await message.edit(content=None, embed=embed, view=view)
