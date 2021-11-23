@@ -9,7 +9,7 @@ from discord.ext import commands
 from discord.ext import tasks
 
 from bot import config
-from bot.db import get_session
+from bot import db
 
 
 class Stats(commands.Cog):
@@ -62,7 +62,7 @@ class Stats(commands.Cog):
                 self._status_message = await channel.send('\u200c')
 
         proc = psutil.Process()
-        db = get_session()
+        redis = db.get_object()
 
         with proc.oneshot():
             embed = discord.Embed(
@@ -73,11 +73,11 @@ class Stats(commands.Cog):
             )
 
             try:
-                db_mem = await db.memory_stats()
+                db_mem = await redis.memory_stats()
                 embed.add_field(
                     name='Database',
                     value=(
-                        f'**Session ::** {type(db).__name__}\n'
+                        f'**Session ::** {type(redis).__name__}\n'
                         f'⇒ Memory allocated: `{db_mem["dataset.bytes"] / 1024:.2f}kb` (data) '
                         f'+ `{db_mem["overhead.total"] / 1024:.2f}kb` (redis)\n'
                         f'⇒ Keys stored: `{db_mem["keys.count"]:,}`\n'

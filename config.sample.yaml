@@ -21,3 +21,5 @@ skins:
           swap: '🔀'
 
 status-channel: null
+
+redis: 'auto' # 'fakeredis', 'aioredis' or 'auto'; use aioredis if you are using a server

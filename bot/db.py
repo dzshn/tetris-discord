@@ -1,23 +1,24 @@
-from typing import Union
-
 import aioredis
 import fakeredis.aioredis
 import redis
 
-db_ids = {
-    'settings': 0,
-    'zen': 1,
-    'marathon': 2,
-}
+from bot import config
 
 
-def get_session(name: Union[str, int] = 0) -> aioredis.Redis:
-    db_id = db_ids[name] if isinstance(name, str) else name
+def get_object() -> aioredis.Redis:
+    lib = config.data['redis']
+    if lib == 'aioredis':
+        return aioredis.from_url('redis://localhost')
 
-    try:
-        redis.from_url('redis://localhost').ping()
+    elif lib == 'fakeredis':
+        return fakeredis.aioredis.FakeRedis()
 
-    except redis.ConnectionError:
-        return fakeredis.aioredis.FakeRedis(db=db_id)
+    else:
+        try:
+            redis.from_url('redis://localhost').ping()
 
-    return aioredis.from_url('redis://localhost', db=db_id)
+        except redis.ConnectionError:
+            return fakeredis.aioredis.FakeRedis()
+
+        else:
+            return aioredis.from_url('redis://localhost')

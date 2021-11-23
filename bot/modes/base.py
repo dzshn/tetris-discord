@@ -5,7 +5,7 @@ from typing import Any, ClassVar
 import discord
 from discord.ext import commands
 
-from bot.db import get_session
+from bot import db
 from bot.engine import BaseGame
 
 
@@ -45,7 +45,7 @@ class BaseMode(metaclass=ABCMeta):
 
     @functools.cached_property
     def db(self):
-        return get_session(self.name)
+        return db.get_object()
 
     def get_callback(
         self, game: BaseGame, message: discord.Message, view: discord.ui.View
