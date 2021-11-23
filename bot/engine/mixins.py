@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from bot.engine import BaseGame
 from bot.engine import Piece
 from bot.engine import PieceType
 
@@ -31,7 +32,12 @@ class DeltaFrame:
         return (self.c_piece.r - self.p_piece.r) % 4  # type: ignore
 
 
-class Frameable:
+class GameMixin:
+    def __init__(self, **kwargs):
+        BaseGame.__init__(self, **kwargs)
+
+
+class Frameable(GameMixin):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.delta = DeltaFrame(None, self.piece.copy())

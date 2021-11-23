@@ -8,7 +8,7 @@ from bot.engine.mixins import StandardScore
 from bot.modes import base
 
 
-class ZenGame(engine.BaseGame, StandardScore):
+class ZenGame(StandardScore, engine.BaseGame):
     pass
 
 
