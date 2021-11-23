@@ -2,7 +2,7 @@ import enum
 import math
 import random
 import secrets
-from typing import NamedTuple, Optional, Union
+from typing import NamedTuple, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -11,8 +11,8 @@ from bot.engine.consts import SHAPES
 from bot.engine.consts import SRS_I_KICKS
 from bot.engine.consts import SRS_KICKS
 
-Seed = Union[str, bytes, int]
-QueueSeq = list['PieceType']
+Seed: TypeAlias = str | bytes | int
+QueueSeq: TypeAlias = list['PieceType']
 
 PieceType = enum.IntEnum('PieceType', 'I L J S Z T O')
 Position = NamedTuple('Position', [('x', int), ('y', int)])
@@ -25,9 +25,9 @@ class Piece:
         self,
         board: NDArray[np.int8],
         type: PieceType,
-        x: Optional[int] = None,
-        y: Optional[int] = None,
-        pos: Optional[Position] = None,
+        x: int | None = None,
+        y: int | None = None,
+        pos: int | None = None,
         r: int = 0,
     ):
         self.board = board
@@ -135,7 +135,7 @@ class BaseGame:
         )
         self.board = np.zeros((40, 10), dtype=np.int8)
         self.piece = Piece(self.board, kwargs.get('piece') or self.queue.pop())
-        self.hold: Optional[int] = None
+        self.hold: int | None = None
         self.hold_lock = False
 
     def reset(self):

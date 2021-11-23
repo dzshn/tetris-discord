@@ -272,8 +272,8 @@ voice = ["PyNaCl (>=1.3.0,<1.5)"]
 [package.source]
 type = "git"
 url = "https://github.com/nextcord/nextcord"
-reference = "c9a17374ac3568dc704e46bb856811d3a85038d3"
-resolved_reference = "c9a17374ac3568dc704e46bb856811d3a85038d3"
+reference = "8c8bbb0868512d626cb6b624761d22ff2602d1af"
+resolved_reference = "8c8bbb0868512d626cb6b624761d22ff2602d1af"
 
 [[package]]
 name = "numpy"
@@ -495,7 +495,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.10"
-content-hash = "c25495cbc638d77035934620b833c548cdd0c571a1983cc139800ff7a9348646"
+content-hash = "88260d2227bb6a34685db057b58d75e7be6dc19b21d49d0bf8f9dd7d657b8e29"
 
 [metadata.files]
 aiodns = [

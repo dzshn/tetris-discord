@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from bot.engine import BaseGame
 from bot.engine import Piece
@@ -8,7 +7,7 @@ from bot.engine import PieceType
 
 @dataclass(frozen=True)
 class DeltaFrame:
-    p_piece: Optional[Piece]
+    p_piece: Piece | None
     c_piece: Piece
 
     def __post_init__(self):

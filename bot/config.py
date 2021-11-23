@@ -1,7 +1,6 @@
 import pathlib
 import sys
 import warnings
-from typing import Optional
 
 import yaml
 
@@ -32,8 +31,8 @@ class _Config:
 
     def __init__(self):
         self._cache_time = 0
-        self._cached_cfg: Optional[dict] = None
-        self._sample_cfg: Optional[dict] = None
+        self._cached_cfg: dict | None = None
+        self._sample_cfg: dict | None = None
 
     @property
     def data(self) -> dict:

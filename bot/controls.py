@@ -1,5 +1,4 @@
 from collections.abc import Callable
-from typing import Optional
 
 import discord
 
@@ -11,8 +10,8 @@ class Controls(discord.ui.View):
     def __init__(self, game: BaseGame):
         self.game = game
         # FIXME: how do you even type coroutines what
-        self._callback: Optional[Callable] = None
-        self._check: Optional[Callable] = None
+        self._callback: Callable | None = None
+        self._check: Callable | None = None
         super().__init__(timeout=600)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:

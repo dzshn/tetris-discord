@@ -1,6 +1,5 @@
 import datetime
 import gc
-from typing import Optional
 
 import aioredis
 import discord
@@ -15,7 +14,7 @@ from bot import db
 class Stats(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self._status_message: Optional[discord.Message] = None
+        self._status_message: discord.Message | None = None
         self.update_status.start()
 
     def cog_unload(self):
@@ -46,7 +45,7 @@ class Stats(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def update_status(self):
-        channel: Optional[discord.TextChannel] = self.bot.get_channel(
+        channel: discord.TextChannel | None = self.bot.get_channel(
             config.data['status-channel']
         )  # type: ignore
         if channel is None:
