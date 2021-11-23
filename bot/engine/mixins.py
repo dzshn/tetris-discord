@@ -101,7 +101,7 @@ class StandardScore(Frameable):
         for x, y in piece.shape + piece.pos:
             board[x, y] = piece.type
 
-        line_clears = len([row for row in self.board if row.all()])
+        line_clears = sum(board.all(1))
 
         tspin = False
         tspin_mini = False
@@ -141,9 +141,6 @@ class StandardScore(Frameable):
         else:
             self.combo = 0
 
-        back_to_back = self.back_to_back
-        combo = self.combo
-
         # There are all blank lines, but also account for those that will be cleared later
         perfect_clear = not any((not row.all()) and row.any() for row in board)
 
@@ -158,10 +155,10 @@ class StandardScore(Frameable):
         else:
             score_add += [0, 100, 300, 500, 800][line_clears]
 
-        score_add += 50 * combo
+        score_add += 50 * self.combo
         score_add *= self.score_multiplier
 
-        if back_to_back > 1:
+        if self.back_to_back > 1:
             score_add = score_add * 3 // 2
             if perfect_clear:
                 # An odd edge-case but seems to be on games with per-line PC scores
@@ -170,3 +167,11 @@ class StandardScore(Frameable):
         self.score += score_add
 
         super().lock_piece()
+
+    def hard_drop(self):
+        super().hard_drop()
+        self.score += self.delta.x * 2
+
+    def soft_drop(self):
+        super().soft_drop()
+        self.score += self.delta.x
