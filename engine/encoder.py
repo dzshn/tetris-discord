@@ -1,4 +1,6 @@
 import base64
+import enum
+from typing import NamedTuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -6,7 +8,22 @@ from numpy.typing import NDArray
 from engine import Piece
 
 
-def encode(board: NDArray[np.int8], piece: Piece | None) -> bytes:
+class EncoderFlag(enum.IntFlag):
+    HAS_PIECE = 1 << 0
+    # HAS_QUEUE = 1 << 1
+
+
+class EncoderData(NamedTuple):
+    board: NDArray[np.int8]
+    piece: Piece | None
+    # queue: list[PieceType] | None
+
+
+def encode(
+    board: NDArray[np.int8],
+    piece: Piece | None = None,
+    # queue: list[PieceType] | None = None,
+) -> bytes:
     board = board.copy()
     mx, my = board.shape
     if len(board.flat) % 2 != 0:
@@ -17,9 +34,11 @@ def encode(board: NDArray[np.int8], piece: Piece | None) -> bytes:
             board = board[i:]
             break
 
-    encoded = bytearray()
-    encoded.append(mx)
-    encoded.append(my)
+    flags = EncoderFlag(0)
+    if piece is not None:
+        flags = flags | EncoderFlag.HAS_PIECE
+
+    encoded = bytearray([flags, mx, my])
     if piece is not None:
         encoded.extend([piece.type, piece.x, piece.y, piece.r])
     else:
@@ -31,25 +50,28 @@ def encode(board: NDArray[np.int8], piece: Piece | None) -> bytes:
     return encoded
 
 
-def decode(encoded: bytes) -> tuple[NDArray[np.int8], Piece]:
-    mx, my, pt, px, py, pr, *encoded = encoded
+def decode(encoded: bytes) -> EncoderData:
+    flags, mx, my, *encoded = encoded
+    if flags.HAS_PIECE:
+        pt, px, py, pr, *encoded = encoded
+
     decoded = []
     for i in encoded:
         decoded.extend([i >> 4, i - (i >> 4 << 4)])
 
     board = np.array(decoded, dtype=np.int8).reshape((-1, my))
     board = np.concatenate((np.zeros((mx - len(board), my), dtype=np.int8), board))
-    if pt:
+    if flags.HAS_PIECE:
         piece = Piece(board, type=pt, x=px, y=py, r=pr)
     else:
         piece = None
 
-    return (board, piece)
+    return EncoderData(board=board, piece=piece)
 
 
-def encode_string(board: NDArray[np.int8], piece: Piece | None) -> str:
-    return base64.b64encode(encode(board, piece)).decode()
+def encode_string(*args, **kwargs) -> str:
+    return base64.b64encode(encode(*args, **kwargs)).decode()
 
 
-def decode_string(encoded: str) -> tuple[NDArray[np.int8], Piece]:
-    return decode(base64.b64decode(encoded.encode()))
+def decode_string(*args, **kwargs) -> EncoderData:
+    return decode(base64.b64decode(*args, **kwargs))
