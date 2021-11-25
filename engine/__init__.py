@@ -7,9 +7,9 @@ from typing import NamedTuple, TypeAlias
 import numpy as np
 from numpy.typing import NDArray
 
-from bot.engine.consts import SHAPES
-from bot.engine.consts import SRS_I_KICKS
-from bot.engine.consts import SRS_KICKS
+from engine.consts import SHAPES
+from engine.consts import SRS_I_KICKS
+from engine.consts import SRS_KICKS
 
 Seed: TypeAlias = str | bytes | int
 QueueSeq: TypeAlias = list['PieceType']

@@ -3,7 +3,7 @@ from collections.abc import Callable
 import discord
 
 from bot import config
-from bot.engine import BaseGame
+from engine import BaseGame
 
 
 class Controls(discord.ui.View):

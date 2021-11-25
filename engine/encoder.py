@@ -3,7 +3,7 @@ import base64
 import numpy as np
 from numpy.typing import NDArray
 
-from bot.engine import Piece
+from engine import Piece
 
 
 def encode(board: NDArray[np.int8], piece: Piece | None) -> bytes:

@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from bot.engine import BaseGame
-from bot.engine import Piece
-from bot.engine import PieceType
+from engine import BaseGame
+from engine import Piece
+from engine import PieceType
 
 
 @dataclass(frozen=True)

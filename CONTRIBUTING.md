@@ -6,9 +6,7 @@ if you have any specific questions, you can ask them on the [Discord server](htt
 
 You can do so [here](https://github.com/dzshn/tetris-discord/issues/new/choose)! whether it's for a feature request or a bug or anything, you may ask it there
 
-for short questions or just simple things in general, I'd really recommend not using the issue tracker for it, but don't worry too much about it!
-
-something something provide as much info as you can byebye ty <3
+it's best to provide as much info as you can so the issue can be resolved quickly
 
 # Making a PR
 
@@ -35,10 +33,10 @@ good question! the code isn't properly documented (yet!), so here's some info I 
 
 Currently, the bot itself is a package ([`bot/`](bot)), split into three major ones + a few single-file scripts:
 
--   [`bot.engine`](bot/engine): This has the core stuff for creating new games, mainly the `BaseGame` class, which is subclassed for each mode to add their own functionality. In fact though, this class can be used on it's own! e.g.::
+-   [`engine`](engine/): This has the core stuff for creating new games, mainly the `BaseGame` class, which is subclassed for each mode to add their own functionality. In fact though, this class can be used on it's own! e.g.::
 
     ```py
-    >>> from bot.engine import BaseGame
+    >>> from engine import BaseGame
     >>> game = BaseGame(seed='abcd')
     >>> game.queue
     Queue(queue=[<PieceType.S: 4>, <PieceType.T: 6>, <PieceType.O: 7>, <PieceType.Z: 5>], bag=[<PieceType.I: 1>, <PieceType.L: 2>])

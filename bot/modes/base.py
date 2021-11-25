@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from bot import db
-from bot.engine import BaseGame
+from engine import BaseGame
 
 
 class ABCMeta(abc.ABCMeta):

@@ -1,11 +1,11 @@
 import discord
 from discord.ext import commands
 
+import engine
 from bot import config
 from bot import controls
-from bot import engine
-from bot.engine.mixins import StandardScore
 from bot.modes import base
+from engine.mixins import StandardScore
 
 
 class ZenGame(StandardScore, engine.BaseGame):
