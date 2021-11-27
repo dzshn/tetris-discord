@@ -20,6 +20,7 @@ class ABCMeta(abc.ABCMeta):
 class BaseMode(metaclass=ABCMeta):
     name: ClassVar[str]
     game_cls: ClassVar[type]
+    cog: commands.Cog
 
     __instance = None
 
@@ -32,6 +33,7 @@ class BaseMode(metaclass=ABCMeta):
     def __init_subclass__(cls, /, name: str, game_cls: BaseGame):
         cls.name = name
         cls.game_cls = game_cls  # type: ignore
+        cls.cog = None  # type: ignore
 
     @abc.abstractmethod
     async def command(self, ctx: commands.Context):

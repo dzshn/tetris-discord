@@ -47,11 +47,12 @@ def encode(
     for a, b in board.reshape((len(board.flat) // 2, 2)):
         encoded.append((a << 4) + b)
 
-    return encoded
+    return bytes(encoded)
 
 
 def decode(encoded: bytes) -> EncoderData:
     flags, mx, my, *encoded = encoded
+    flags = EncoderFlag(flags)
     if flags.HAS_PIECE:
         pt, px, py, pr, *encoded = encoded
 
