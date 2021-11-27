@@ -15,15 +15,12 @@ fakeredis = "^1.6.1"
 redis = "^3.5.3"
 hiredis = "^2.0.0"
 PyYAML = "^6.0"
-types-redis = "^3.5.15"
-types-psutil = "^5.8.13"
 nextcord = {git = "https://github.com/nextcord/nextcord", rev = "8c8bbb0868512d626cb6b624761d22ff2602d1af", extras = ["speed"]}
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
 isort = "^5.9.3"
 black = "^21.9b0"
-mypy = "^0.910"
 
 [tool.black]
 skip-string-normalization = true

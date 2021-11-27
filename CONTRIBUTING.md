@@ -20,7 +20,6 @@ Feel free to do so!!! there are currently no proposed rules for it, but, if your
     (tetris-...-py3.9) ~$ black .   # <- formatter
     (tetris-...-py3.9) ~$ isort .   # <- very cool thing that sorts imports
     (tetris-...-py3.9) ~$ flake8 .  # <- will scream if there is a possible error
-    (tetris-...-py3.9) ~$ mypy .    # <- will scream if types aren't properly set
     ```
 
 If you aren't able to do so, don't worry! those can be fixed via a rebase!
