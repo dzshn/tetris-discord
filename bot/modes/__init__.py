@@ -1,7 +1,6 @@
-# from bot.modes.marathon import MarathonMode
+from bot.modes.base import BaseMode
 from bot.modes.zen import ZenMode
 
-MODES = [
-    # MarathonMode,
-    ZenMode,
-]
+__all__ = ('BaseMode', 'ZenMode')
+
+MODES = (ZenMode,)
