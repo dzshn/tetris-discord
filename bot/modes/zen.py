@@ -37,7 +37,9 @@ class ZenMode(base.BaseMode, name='zen', game_cls=ZenGame):
                 seed=secrets.token_bytes(),
             )
             game.hold_lock = bool(save['hlock'])
-            game.hold = engine.PieceType(int(save['hold'])) if int(save['hold']) else None
+            game.hold = (
+                engine.PieceType(int(save['hold'])) if int(save['hold']) else None
+            )
 
         view = controls.DefaultControls(game)
 
@@ -72,8 +74,11 @@ class ZenMode(base.BaseMode, name='zen', game_cls=ZenGame):
 
         embed.add_field(name='Score', value=f'**{game.score}**\n{game.score_delta:+}')
         embed.add_field(
-            name='Queue', value=', '.join(f'`{i}`' for i in game.queue.pieces[:4])
+            name='Queue',
+            value=', '.join(
+                f'`{engine.PieceType(i).name}`' for i in game.queue.pieces[:4]
+            ),
         )
-        embed.add_field(name='Hold', value=f'`{game.hold}`')
+        embed.add_field(name='Hold', value=f'`{engine.PieceType(game.hold).name}`')
 
         await message.edit(content=None, embed=embed, view=view)

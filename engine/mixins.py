@@ -90,6 +90,7 @@ class StandardScore(Frameable):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.score = 0
+        self.score_delta = 0
         self.score_multiplier = 1
         self.combo = 0
         self.back_to_back = 0
@@ -164,6 +165,7 @@ class StandardScore(Frameable):
                 score_add += 200 * self.score_multiplier
 
         self.score += score_add
+        self.score_delta = score_add
 
         super().lock_piece()
 
