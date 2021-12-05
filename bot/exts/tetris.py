@@ -44,6 +44,7 @@ class Tetris(commands.Cog):
 
         game, ctrl = self.games[ctx.author.id]
         game.reset()
+        await ctrl._callback()
 
 
 def setup(bot: commands.Bot):

@@ -1,6 +1,7 @@
 import secrets
 
 import discord
+import numpy as np
 from discord.ext import commands
 
 import engine
@@ -12,7 +13,13 @@ from engine.mixins import StandardScore
 
 
 class ZenGame(StandardScore, engine.BaseGame):
-    pass
+    def reset(self):
+        self.seed = secrets.token_bytes()
+        self.queue = engine.Queue(queue=[], bag=[], seed=self.seed)
+        self.board = np.zeros((40, 10), dtype=np.int8)
+        self.piece = engine.Piece(self.board, self.queue.pop())
+        self.hold = None
+        self.hold_lock = False
 
 
 class ZenMode(base.BaseMode, name='zen', game_cls=ZenGame):
