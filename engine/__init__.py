@@ -186,6 +186,9 @@ class BaseGame:
         return '\n'.join(''.join(tiles[j] for j in i) for i in board[-lines:])
 
     def swap(self):
+        if self.hold_lock:
+            return
+
         if self.hold is None:
             self.hold = self.piece.type
             self.piece = Piece(self.board, self.queue.pop())
