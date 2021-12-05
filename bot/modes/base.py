@@ -1,12 +1,14 @@
 import abc
 import functools
-from typing import Any, ClassVar
+from typing import Any, ClassVar, TypeAlias
 
 import discord
 from discord.ext import commands
 
 from bot import db
 from engine import BaseGame
+
+Save: TypeAlias = dict[str | bytes, str | bytes]
 
 
 class ABCMeta(abc.ABCMeta):
@@ -48,6 +50,18 @@ class BaseMode(metaclass=ABCMeta):
     @functools.cached_property
     def db(self):
         return db.get_object()
+
+    async def save(self, user: discord.User, data: Save):
+        await self.db.hset(f'{self.name}:{user.id:x}', mapping=data)
+        await self.db.zadd(f'top:{self.name}', mapping={f'{user.id:x}': data['score']})
+
+    async def get_save(self, user: discord.User) -> Save | None:
+        if await self.db.exists(f'{self.name}:{user.id:x}'):
+            data = await self.db.hgetall(f'{self.name}:{user.id:x}')
+            return {k.decode(): v for k, v in data.items()}
+
+        else:
+            return None
 
     def get_callback(
         self, game: BaseGame, message: discord.Message, view: discord.ui.View

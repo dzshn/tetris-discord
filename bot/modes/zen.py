@@ -18,20 +18,19 @@ class ZenGame(StandardScore, engine.BaseGame):
 class ZenMode(base.BaseMode, name='zen', game_cls=ZenGame):
     async def command(self, ctx: commands.Context):
         game = ZenGame()
-        if await self.db.exists(f'zen:{ctx.author.id:x}'):
-            h = await self.db.hgetall(f'zen:{ctx.author.id:x}')
-            game.board = encoder.decode(h[b'board']).board
+        if (save := await self.get_save(ctx.author)) is not None:
+            game.board = encoder.decode(save['board']).board
             game.piece = engine.Piece(
-                board=game.board, type=engine.PieceType(int(h[b'piece']))
+                board=game.board, type=engine.PieceType(int(save['piece']))
             )
-            game.score = int(h[b'score'])
+            game.score = int(save['score'])
             game.queue = engine.Queue(
-                queue=list(h[b'queue'][:4]),
-                bag=list(h[b'queue'][4:]),
+                queue=list(save['queue'][:4]),
+                bag=list(save['queue'][4:]),
                 seed=secrets.token_bytes(),
             )
-            game.hold_lock = int(h[b'hold']) & (1 << 4)
-            game.hold = int(h[b'hold']) ^ (1 << 4)
+            game.hold_lock = int(save['hold']) & (1 << 4)
+            game.hold = int(save['hold']) ^ (1 << 4)
 
         view = controls.DefaultControls(game)
 
@@ -44,10 +43,10 @@ class ZenMode(base.BaseMode, name='zen', game_cls=ZenGame):
         await view.wait()
 
         del self.cog.games[ctx.author.id]
-        await self.db.hset(
-            f'zen:{ctx.author.id:x}',
-            mapping={
-                'board': encoder.encode(game.board),
+        await self.save(
+            ctx.author,
+            {
+                'board': encoder.encode(board=game.board),
                 'piece': game.piece.type.value,
                 'score': game.score,
                 'queue': bytes(game.queue.pieces + game.queue.bag),
