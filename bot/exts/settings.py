@@ -17,7 +17,7 @@ class Settings(commands.Cog):
     @commands.command()
     async def preview(self, ctx: commands.Context):
         """Preview what your current config looks like in a game"""
-        user_skin = self.bot.db.table('settings').get(where('user_id') == ctx.author.id).get('skin', 0)
+        user_skin = (self.bot.db.table('settings').get(where('user_id') == ctx.author.id) or {}).get('skin', 0)
         board, piece = Encoder.decode('ACIAAAAAAlUAATMCZVdxMAZmF3EwAEQVUXcEQhNVdwIiEzM=@6+16+-1+1')
         ghost = piece.copy()
         ghost.x += 30
