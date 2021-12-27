@@ -14,7 +14,7 @@ psutil = "^5.8.0"
 yade = {git = "https://github.com/dzshn/yade", rev = "main"}
 
 [tool.poetry.dev-dependencies]
-yapf = "^0.31.0"
+yapf = "^0.32.0"
 toml = "^0.10.2"
 flake8 = "^4.0.1"
 rope = "^0.20.1"
