@@ -10,16 +10,18 @@ skins:
 
       # The emotes for the buttons
       controls:
-          # Left/right
-          drag: ['◀️', '▶️']
-          # DAS left/right
-          das: ['⏪', '⏩']
-          # Soft drop/hard drop
-          drop: ['🔽', '⏬']
-          # Rotate ccw, cw, 2x
-          rotate: ['↪️', '↩️', '🔄']
+          left: '◀️'
+          right: '▶️'
+          das-left: '⏪'
+          das-right: '⏩'
+          soft-drop: '🔽'
+          hard-drop: '⏬'
+          rotate-ccw: '↪️'
+          rotate-cw: '↩️'
+          rotate-2cw: '🔄'
           swap: '🔀'
 
+test-servers: []
 status-channel: null
 
 redis: 'auto' # 'fakeredis', 'aioredis' or 'auto'; use aioredis if you are using a server
