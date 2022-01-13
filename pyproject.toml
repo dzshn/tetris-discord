@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "tetris"
+name = "tetris-bot"
 version = "0.2.0-alpha.0"
 description = "i have too much free time"
 authors = ["Sofia \"dzshn\" N. L. <zshn@pm.me>"]
@@ -16,6 +16,7 @@ hiredis = "^2.0.0"
 PyYAML = "^6.0"
 hikari = "^2.0.0-alpha.105"
 hikari-lightbulb = "^2.1.3"
+tetris = {git = "https://github.com/dzshn/python-tetris", rev = "main"}
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"

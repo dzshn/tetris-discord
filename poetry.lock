@@ -379,6 +379,25 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "tetris"
+version = "0.1.0"
+description = "Guideline-compliant Tetris engine"
+category = "main"
+optional = false
+python-versions = ">=3.9,<3.11"
+develop = false
+
+[package.dependencies]
+numpy = "^1.21.4"
+typing-extensions = "^4.0.1"
+
+[package.source]
+type = "git"
+url = "https://github.com/dzshn/python-tetris"
+reference = "main"
+resolved_reference = "915ea8fc596c6a56a6b2411ec759e02137787887"
+
+[[package]]
 name = "tomli"
 version = "1.2.3"
 description = "A lil' TOML parser"
@@ -409,7 +428,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.10"
-content-hash = "d92d9b7da5a9022ede004cf1ffe367b2912e822f66c89abf58f16cec96446502"
+content-hash = "f559e045ac211870f39b276f2c11f434a04d11a09cad52351fc212ac4bd8c00e"
 
 [metadata.files]
 aiohttp = [
@@ -877,6 +896,7 @@ sortedcontainers = [
     {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
     {file = "sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88"},
 ]
+tetris = []
 tomli = [
     {file = "tomli-1.2.3-py3-none-any.whl", hash = "sha256:e3069e4be3ead9668e21cb9b074cd948f7b3113fd9c8bba083f48247aab8b11c"},
     {file = "tomli-1.2.3.tar.gz", hash = "sha256:05b6166bff487dc068d322585c7ea4ef78deed501cc124060e0f238e89a9231f"},
