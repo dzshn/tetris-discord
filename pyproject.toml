@@ -3,7 +3,13 @@ name = "tetris-bot"
 version = "0.2.0-alpha.0"
 description = "i have too much free time"
 authors = ["Sofia \"dzshn\" N. L. <zshn@pm.me>"]
+readme = "README.md"
+homepage = "https://td.dzshn.xyz"
+repository = "https://github.com/dzshn/tetris-discord"
 license = "MIT"
+packages = [
+    { include = 'src' }
+]
 
 [tool.poetry.dependencies]
 python = "~3.10"
@@ -22,6 +28,7 @@ tetris = {git = "https://github.com/dzshn/python-tetris", rev = "main"}
 flake8 = "^4.0.1"
 isort = "^5.9.3"
 black = "^21.9b0"
+tox = "^3.24.5"
 
 [tool.black]
 
