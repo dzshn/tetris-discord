@@ -2,11 +2,11 @@
 prefix: 'tt!'
 skins:
     - name: 'default'
-      # Ordered as: [Background, I, L, J, S, Z, T, O, Garbage, Ghost]
+      # Ordered as: [Background, I, L, J, S, Z, T, O, Ghost, Garbage]
       # This can be any text. If you're using custom emotes, use the <:name:id> format.
       # Due to discord's limits with embeds, their names should have at most two characters
       # or the text size exceeds 4096 chars
-      pieces: ['⬛', '🟦', '🟧', '🟦', '🟩', '🟥', '🟪', '🟨', '🔳', '◽']
+      pieces: ['⬛', '🟦', '🟧', '🟦', '🟩', '🟥', '🟪', '🟨', '◽', '🔳']
 
       # The emotes for the buttons
       controls:
