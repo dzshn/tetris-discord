@@ -7,35 +7,35 @@ from http.server import ThreadingHTTPServer
 parser = argparse.ArgumentParser(
     formatter_class=argparse.RawTextHelpFormatter,
     description=(
-        'Properly serves docs/ for testing, letting vue-router handle pages.\n\nSee'
-        ' https://next.router.vuejs.org/guide/essentials/history-mode.html#html5-mode'
-        ' for more info'
+        "Properly serves docs/ for testing, letting vue-router handle pages.\n\nSee"
+        " https://next.router.vuejs.org/guide/essentials/history-mode.html#html5-mode"
+        " for more info"
     ),
-    usage='python docs.py [--port int]',
+    usage="python docs.py [--port int]",
 )
-parser.add_argument('--port', default=8080, type=int, metavar='int')
+parser.add_argument("--port", default=8080, type=int, metavar="int")
 
 args = parser.parse_args()
 
 
 class DocsRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        kwargs['directory'] = 'docs/'
+        kwargs["directory"] = "docs/"
         super().__init__(*args, **kwargs)
 
     def translate_path(self, path: str) -> str:
         path = super().translate_path(path)  # type: ignore
 
         if not pathlib.Path(path).exists():
-            return 'docs/index.html'
+            return "docs/index.html"
 
         return path
 
 
-server = ThreadingHTTPServer(('0.0.0.0', args.port), DocsRequestHandler)
+server = ThreadingHTTPServer(("0.0.0.0", args.port), DocsRequestHandler)
 
-print(f'Serving docs/ on http://0.0.0.0:{args.port}/')
-webbrowser.open(f'http://localhost:{args.port}')
+print(f"Serving docs/ on http://0.0.0.0:{args.port}/")
+webbrowser.open(f"http://localhost:{args.port}")
 
 try:
     server.serve_forever()

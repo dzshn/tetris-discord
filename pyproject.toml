@@ -1,43 +1,48 @@
 [tool.poetry]
-name = "tetris"
+name = "tetris-bot"
 version = "0.2.0-alpha.0"
 description = "i have too much free time"
 authors = ["Sofia \"dzshn\" N. L. <zshn@pm.me>"]
+readme = "README.md"
+homepage = "https://td.dzshn.xyz"
+repository = "https://github.com/dzshn/tetris-discord"
 license = "MIT"
+packages = [
+    { include = 'src' }
+]
 
 [tool.poetry.dependencies]
 python = "~3.10"
 numpy = "^1.21.2"
 psutil = "^5.8.0"
-yade = {git = "https://github.com/dzshn/yade", rev = "main"}
 aioredis = "^2.0.0"
 fakeredis = "^1.6.1"
 redis = "^3.5.3"
 hiredis = "^2.0.0"
 PyYAML = "^6.0"
-nextcord = {git = "https://github.com/nextcord/nextcord", rev = "8c8bbb0868512d626cb6b624761d22ff2602d1af", extras = ["speed"]}
+hikari = "^2.0.0-alpha.105"
+hikari-lightbulb = "^2.1.3"
+tetris = {git = "https://github.com/dzshn/python-tetris", rev = "main"}
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
 isort = "^5.9.3"
 black = "^21.9b0"
+tox = "^3.24.5"
 
 [tool.black]
-skip-string-normalization = true
 
 [tool.isort]
 profile = "google"
 force_sort_within_sections = false
 
 [tool.mypy]
-namespace_packages = true
 python_version = "3.10"
 warn_unused_configs = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 warn_unreachable = true
 check_untyped_defs = true
-allow_redefinition = true # Remove later?
 
 [[tool.mypy.overrides]]
 module = 'fakeredis.*'

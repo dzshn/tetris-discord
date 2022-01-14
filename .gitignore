@@ -3,6 +3,10 @@ TOKEN
 db.rdb
 config.yaml
 
+# tests
+.tox/
+.mypy_cache/
+
 # cached stuff
 __pycache__/
 *.pyc
