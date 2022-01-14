@@ -1,3 +1,5 @@
+from typing import Optional
+
 import hikari
 import lightbulb
 import tetris
@@ -19,6 +21,30 @@ MOVES = {
     "rotate-2cw": tetris.Move.rotate(+2),
     "swap": tetris.Move.swap(),
 }
+
+
+class DiscordGame(tetris.BaseGame):
+    def render(self, tiles: list[str], lines: Optional[int] = None) -> str:
+        return super().render(
+            tiles=tiles,
+            lines=lines or 4096 // (max(map(len, tiles)) * (self.board.shape[1] + 1)),
+        )
+
+    def embed(self, ctx: lightbulb.Context, tiles: list[str]) -> hikari.Embed:
+        embed = hikari.Embed(description=self.render(tiles=tiles))
+        embed.add_field(
+            "Queue", ",".join("`" + i.name + "`" for i in self.queue[:4]), inline=True
+        )
+        embed.add_field(
+            "Hold", "`" + self.hold.name + "`" if self.hold else "`None`", inline=True
+        )
+        embed.add_field("Score", f"**{self.score:,}**")
+        embed.set_footer(
+            text=ctx.author.username,
+            icon=ctx.author.avatar_url or ctx.author.default_avatar_url,
+        )
+
+        return embed
 
 
 def build_components(
@@ -52,18 +78,14 @@ def build_components(
 
 @plugin.command
 @lightbulb.option("mode", "What mode to play", default="zen", choices=["zen"])
-@lightbulb.command("play", "Start a game of tetris", auto_defer=True)
+@lightbulb.command("play", "Start a game of tetris")
 @lightbulb.implements(lightbulb.SlashCommand)
-async def tetris_play(ctx: lightbulb.Context):
+async def tetris_play(ctx: lightbulb.SlashContext):
     skin = config["skins"][0]
 
-    game = tetris.BaseGame()
-    embed = hikari.Embed(description=game.render(tiles=skin["pieces"], lines=14))
-
-    embed.set_footer(
-        text=ctx.author.username,
-        icon=ctx.author.avatar_url or ctx.author.default_avatar_url,
-    )
+    game = DiscordGame()
+    embed = game.embed(skin["pieces"])
+    embed.colour = 0xFA509F
 
     layout = [
         ["noop", "hard-drop", "noop1", "swap", "rotate-2cw"],
@@ -86,15 +108,31 @@ async def tetris_play(ctx: lightbulb.Context):
         async for event in stream:
             cid = event.interaction.custom_id
             game.push(MOVES[cid])
-            embed.description = game.render(tiles=skin["pieces"], lines=14)
 
-            try:
+            embed = game.embed(skin["pieces"])
+            embed.colour = 0xFA509F
+
+            if game.lost:
+                embed.colour = 0xFA5050
+                embed.title = "Top out!"
                 await event.interaction.create_initial_response(
-                    hikari.ResponseType.MESSAGE_UPDATE, embed=embed
+                    hikari.ResponseType.MESSAGE_UPDATE, embed=embed, components=[]
                 )
+                return
 
-            except hikari.NotFoundError:
-                await event.interaction.edit_initial_response(embed=embed)
+            await event.interaction.create_initial_response(
+                hikari.ResponseType.MESSAGE_UPDATE, embed=embed
+            )
+
+    embed = game.embed(skin["pieces"])
+    embed.colour = 0xFA5050
+    embed.title = "Timed out!"
+
+    await ctx.interaction.edit_initial_response(embed=embed, components=[])
+    await ctx.interaction.execute(
+        "This game timed out due to inactivity, but you can resume it with /play!",
+        flags=hikari.MessageFlag.EPHEMERAL,
+    )
 
 
 def load(bot: lightbulb.BotApp):

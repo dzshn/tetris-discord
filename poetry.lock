@@ -435,7 +435,7 @@ typing-extensions = "^4.0.1"
 type = "git"
 url = "https://github.com/dzshn/python-tetris"
 reference = "main"
-resolved_reference = "915ea8fc596c6a56a6b2411ec759e02137787887"
+resolved_reference = "c3241daf531148d0bea165f65ef18a5e7774f475"
 
 [[package]]
 name = "toml"
