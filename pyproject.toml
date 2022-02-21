@@ -9,7 +9,7 @@ license = "MIT"
 python = "^3.9,<3.11"
 "discord.py" = {git = "https://github.com/Rapptz/discord.py"}
 numpy = "^1.22.1"
-tinydb = "^4.5.2"
+tinydb = "^4.7.0"
 psutil = "^5.9.0"
 yade = {git = "https://github.com/dzshn/yade", rev = "main"}
 
