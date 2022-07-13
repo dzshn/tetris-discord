@@ -8,7 +8,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.9,<3.11"
 "discord.py" = {git = "https://github.com/Rapptz/discord.py"}
-numpy = "^1.22.4"
+numpy = "^1.23.1"
 tinydb = "^4.7.0"
 psutil = "^5.9.1"
 yade = {git = "https://github.com/dzshn/yade", rev = "main"}
